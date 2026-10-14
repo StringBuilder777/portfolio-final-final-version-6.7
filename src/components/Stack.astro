@@ -1,0 +1,119 @@
+---
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import { site } from '@/config/site';
+
+// Cada figura vive en src/components/figures/<id>/Figure.astro y se detecta sola.
+// Mientras no exista, se muestra un hueco; .figure-slot fija la proporción para ambos casos.
+const modules = import.meta.glob<{ default: AstroComponentFactory }>('./figures/*/Figure.astro', {
+	eager: true,
+});
+const figures = Object.fromEntries(
+	Object.entries(modules).map(([path, mod]) => [path.split('/')[2], mod.default]),
+);
+
+const ids = new Set<string>(site.stack.map((area) => area.id));
+for (const id of Object.keys(figures)) {
+	if (!ids.has(id)) console.warn(`[stack] figures/${id}/ no corresponde a ningún área de site.stack; se ignora.`);
+}
+---
+
+<section id="stack" class="container section">
+	<h2>Stack</h2>
+	<ol class="areas">
+		{site.stack.map((area) => {
+			const Figure = figures[area.id];
+			return (
+				<li class="area" id={`stack-${area.id}`}>
+					<div class="text">
+						<h3>{area.title}</h3>
+						<p>{area.summary}</p>
+						<ul class="techs">
+							{area.techs.map((tech) => <li>{tech}</li>)}
+						</ul>
+					</div>
+					<div class="figure-slot">
+						{Figure ? (
+							<Figure />
+						) : (
+							<div class="placeholder">
+								<p>{area.concept}</p>
+							</div>
+						)}
+					</div>
+				</li>
+			);
+		})}
+	</ol>
+</section>
+
+<style>
+	.areas {
+		display: grid;
+		gap: 4rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.area {
+		display: grid;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+		gap: 2.5rem;
+		align-items: center;
+	}
+	.area:nth-child(even) .text {
+		order: 2;
+	}
+	h3 {
+		margin: 0 0 0.5rem;
+		font-size: 1.25rem;
+	}
+	p {
+		color: var(--muted);
+		margin: 0 0 1rem;
+	}
+	.techs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
+	}
+	.techs li {
+		padding: 0.15rem 0.5rem;
+		border: 1px solid var(--border);
+		border-radius: 999px;
+	}
+	.figure-slot {
+		min-width: 0;
+		aspect-ratio: 4 / 3;
+	}
+	.placeholder {
+		display: grid;
+		place-items: center;
+		height: 100%;
+		padding: 2rem;
+		border: 1px dashed var(--border);
+		border-radius: 0.75rem;
+		background: var(--surface);
+		color: var(--muted);
+		font-family: var(--font-mono);
+		font-size: 0.85rem;
+		text-align: center;
+	}
+	.placeholder p {
+		margin: 0;
+		color: inherit;
+	}
+	@media (max-width: 768px) {
+		.area {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+		.area:nth-child(even) .text {
+			order: 0;
+		}
+	}
+</style>

@@ -17,7 +17,9 @@ Portafolio de desarrollador hecho con [Astro](https://astro.build) + TypeScript 
 src/
 ├── config/site.ts      # Datos del portafolio (nombre, proyectos, enlaces…)
 ├── layouts/BaseLayout.astro
-├── components/         # Secciones: Header, Hero, Projects, About, Contact, Footer
+├── components/         # Secciones: Header, Hero, Stack, Projects, About, Contact, Footer
+│   └── figures/<id>/   # Figuras isométricas del Stack (una por área, ver AGENTS.md)
+├── lib/iso/            # Kit de la skill Anatomy (MIT) + puente de tema
 ├── pages/              # index.astro, 404.astro
 └── styles/global.css   # Variables de tema claro/oscuro
 ```
