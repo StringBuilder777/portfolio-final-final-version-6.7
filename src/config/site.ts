@@ -72,7 +72,7 @@ export const site: Site = {
 			title: 'Frontend',
 			summary: 'Interfaces rápidas y accesibles que envían el mínimo JavaScript necesario.',
 			concept: 'Arquitectura de islas: una imprenta que estampa HTML estático y solo enciende las piezas interactivas.',
-			techs: ['TypeScript', 'React', 'Astro', 'CSS'],
+			techs: ['TypeScript', 'JavaScript', 'React', 'Astro', 'CSS'],
 		},
 		{
 			id: 'backend',
@@ -84,9 +84,10 @@ export const site: Site = {
 		{
 			id: 'redes',
 			title: 'Redes',
-			summary: 'Cómo viajan los datos: enrutamiento, DNS, balanceo y protocolos.',
-			concept: 'Enrutamiento de paquetes: una red de tubos neumáticos con agujas que eligen el siguiente salto.',
-			techs: ['TCP/IP', 'DNS', 'HTTP'],
+			summary: 'Cómo viajan los datos: enrutamiento, VLANs, filtrado y la configuración de equipos Cisco.',
+			concept:
+				'Enrutamiento y filtrado: un rack de 19" donde los paquetes entran por el patch panel, el firewall los inspecciona con su ACL y el router Cisco elige el siguiente salto por el prefijo más largo.',
+			techs: ['Cisco IOS', 'Packet Tracer', 'Enrutamiento', 'VLAN / VLSM', 'ACL / NAT', 'SSH', 'Rust'],
 		},
 		{
 			id: 'ciberseguridad',

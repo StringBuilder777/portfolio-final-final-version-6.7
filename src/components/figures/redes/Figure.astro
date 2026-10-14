@@ -1,0 +1,416 @@
+---
+// Figura del área Redes: un rack de 19" donde el firewall filtra con su ACL y el router elige el
+// siguiente salto. La geometría se calcula aquí, en build; el navegador solo recibe SVG y, al entrar
+// en pantalla, el script de movimiento.
+import '@/lib/iso/iso.css';
+import '@/lib/iso/theme.css';
+import { figureSvg } from '@/lib/iso/iso-kit';
+import { build, H, W } from './geometry';
+
+const { back, front, label, readout, data } = build();
+const backSvg = figureSvg({ width: W, height: H, label, body: back, className: 'rd-layer' });
+const frontSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="iso-svg rd-layer" viewBox="0 0 ${W} ${H}" aria-hidden="true">${front}</svg>`;
+const keys = [
+	{ brand: 'cisco', name: 'Cisco', role: 'switch y router IOS' },
+	{ brand: 'route', name: 'Enrutamiento', role: 'prefijo más largo' },
+	{ brand: 'fw', name: 'Firewall', role: 'ACL OUTSIDE_IN' },
+	{ brand: 'v10', name: 'VLAN', role: '10 y 20' },
+	{ brand: 'rust', name: 'Rust', role: 'NetCli y BuilderNet' },
+];
+---
+
+<figure class="rd-fig iso" data-figure="redes" data-mode="acl" data-live={JSON.stringify(data)}>
+	<div class="iso-plate rd-plate">
+		<div class="iso-plate-corners">
+			<span class="iso-plate-corner" data-corner="fig" aria-hidden="true">Fig 3</span>
+			<span class="iso-plate-corner" data-corner="title" aria-hidden="true">Rack de enrutamiento</span>
+			<span class="iso-plate-corner" data-corner="hint" aria-hidden="true">Clic: ACL ↔ sin ACL</span>
+			<span class="iso-plate-corner" data-corner="readout" data-readout>{readout}</span>
+		</div>
+		<div class="rd-stage" style={`--ar:${W / H}`}>
+			<Fragment set:html={backSvg} />
+			<canvas class="rd-layer rd-gl" aria-hidden="true"></canvas>
+			<Fragment set:html={frontSvg} />
+			<button
+				class="rd-layer rd-hit"
+				type="button"
+				hidden
+				aria-pressed="true"
+				aria-label="ACL del firewall activa. Al desactivarla, el telnet y el SMB que llegan de Internet entran en la red"
+			></button>
+		</div>
+	</div>
+	<figcaption class="rd-keys">
+		{keys.map((key) => <span class="rd-key" data-brand={key.brand}>{key.name}<span class="rd-role"> · {key.role}</span></span>)}
+	</figcaption>
+</figure>
+
+<script>
+	// Arranque mínimo: el movimiento y WebGL se descargan solo cuando la figura se acerca a la pantalla.
+	for (const root of document.querySelectorAll<HTMLElement>('[data-figure="redes"]')) {
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (!entries.some((entry) => entry.isIntersecting)) return;
+				io.disconnect();
+				import('./live')
+					.then(({ mount }) => mount(root))
+					.catch((error) => console.error('[figura redes]', error));
+			},
+			{ rootMargin: '200px 0px' },
+		);
+		io.observe(root);
+	}
+</script>
+
+<style is:global>
+	.rd-fig {
+		--rd-cisco: #3fb2e6;
+		--rd-route: #2f9fd4;
+		--rd-fw: #ef5b4f;
+		--rd-rust: #e8714c;
+		--rd-v10: #4f94dc;
+		--rd-v20: #2bb3a3;
+		--rd-power: #f0c043;
+		--rd-wan: #e9c046;
+		--rd-sec: #a184ea;
+		--rd-trunk: #ef8a3c;
+		--rd-srv: #45b97c;
+		--rd-isp: #4a4a4e;
+		--rd-fiber: #e3cf3a;
+		--rd-con: #8fd0ee;
+		--rd-hole: #070707;
+		--rd-slot: #080808;
+		--rd-edge: #030303;
+		--rd-led-off: #262626;
+		--rd-lcd: #0b1a11;
+		--rd-lcd-ink: #74eaa0;
+		--rd-led-green: #59e38f;
+		--rd-led-amber: #ffc24a;
+		--rd-led-red: #ff5a52;
+		--rd-led-blue: #6aa8ff;
+		--rd-pk-0: #ffdb99;
+		--rd-pk-1: #ffb847;
+		--rd-pk-2: #ff4d40;
+		--rd-pk-3: #6bffa3;
+		--rd-pk-4: #999a9e;
+		--rd-pk-5: #ff7a38;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		height: 100%;
+		margin: 0;
+	}
+	:root[data-theme='light'] .rd-fig {
+		--rd-cisco: #049fd9;
+		--rd-route: #0b84bd;
+		--rd-fw: #d93a30;
+		--rd-rust: #c2441f;
+		--rd-v10: #2f6fbf;
+		--rd-v20: #13897c;
+		--rd-power: #c99206;
+		--rd-wan: #d6a619;
+		--rd-sec: #7a56d6;
+		--rd-trunk: #df6a14;
+		--rd-srv: #23894f;
+		--rd-isp: #3a3a3e;
+		--rd-fiber: #d1b80d;
+		--rd-con: #5db6df;
+		--rd-hole: #3a3a3f;
+		--rd-slot: #a2a2a8;
+		--rd-edge: #55555b;
+		--rd-led-off: #b9b9bc;
+		--rd-lcd: #d6ead9;
+		--rd-lcd-ink: #17633a;
+		--rd-led-green: #16a34a;
+		--rd-led-amber: #d98a00;
+		--rd-led-red: #dc2626;
+		--rd-led-blue: #2563eb;
+		--rd-pk-0: #c78c1a;
+		--rd-pk-1: #d9800d;
+		--rd-pk-2: #d92626;
+		--rd-pk-3: #1a9952;
+		--rd-pk-4: #73737a;
+		--rd-pk-5: #e05914;
+	}
+	@media (prefers-color-scheme: light) {
+		:root:not([data-theme]) .rd-fig {
+			--rd-cisco: #049fd9;
+			--rd-route: #0b84bd;
+			--rd-fw: #d93a30;
+			--rd-rust: #c2441f;
+			--rd-v10: #2f6fbf;
+			--rd-v20: #13897c;
+			--rd-power: #c99206;
+			--rd-wan: #d6a619;
+			--rd-sec: #7a56d6;
+			--rd-trunk: #df6a14;
+			--rd-srv: #23894f;
+			--rd-isp: #3a3a3e;
+			--rd-fiber: #d1b80d;
+			--rd-con: #5db6df;
+			--rd-hole: #3a3a3f;
+			--rd-slot: #a2a2a8;
+			--rd-edge: #55555b;
+			--rd-led-off: #b9b9bc;
+			--rd-lcd: #d6ead9;
+			--rd-lcd-ink: #17633a;
+			--rd-led-green: #16a34a;
+			--rd-led-amber: #d98a00;
+			--rd-led-red: #dc2626;
+			--rd-led-blue: #2563eb;
+			--rd-pk-0: #c78c1a;
+			--rd-pk-1: #d9800d;
+			--rd-pk-2: #d92626;
+			--rd-pk-3: #1a9952;
+			--rd-pk-4: #73737a;
+			--rd-pk-5: #e05914;
+		}
+	}
+
+	.rd-plate {
+		flex: 1;
+		min-height: 0;
+		padding: 28px 10px;
+		container-type: size;
+	}
+	.rd-stage {
+		position: relative;
+		width: min(100cqw, 100cqh * var(--ar));
+		aspect-ratio: var(--ar);
+		margin: auto;
+	}
+	.rd-hit {
+		padding: 0;
+		border: 0;
+		border-radius: 4px;
+		background: none;
+		cursor: pointer;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.rd-hit[hidden] {
+		display: none;
+	}
+	.rd-hit:focus-visible {
+		outline: 1px solid var(--anatomy-mid);
+		outline-offset: 4px;
+	}
+	.rd-layer {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.rd-gl {
+		pointer-events: none;
+		mix-blend-mode: screen;
+	}
+	:root[data-theme='light'] .rd-gl {
+		mix-blend-mode: normal;
+	}
+	@media (prefers-color-scheme: light) {
+		:root:not([data-theme]) .rd-gl {
+			mix-blend-mode: normal;
+		}
+	}
+
+	/* Piezas teñidas (frontales de equipos, capuchones): los cuatro tonos del kit, en el color de --c. */
+	.rd-t {
+		--anatomy-top: color-mix(in oklab, var(--c) 46%, #1c1c1c);
+		--anatomy-shade-3: color-mix(in oklab, var(--c) 40%, #181818);
+		--anatomy-shade-2: color-mix(in oklab, var(--c) 30%, #151515);
+		--anatomy-shade-1: color-mix(in oklab, var(--c) 26%, #121212);
+		--anatomy-shade-0: color-mix(in oklab, var(--c) 22%, #0f0f0f);
+		--anatomy-hi: color-mix(in oklab, var(--c) 70%, var(--anatomy-strong));
+		--anatomy-mid: color-mix(in oklab, var(--c) 60%, var(--anatomy-paper));
+		--anatomy-lo: color-mix(in oklab, var(--c) 40%, var(--anatomy-paper));
+		--anatomy-faint: color-mix(in oklab, var(--c) 25%, var(--anatomy-paper));
+	}
+	:root[data-theme='light'] .rd-t {
+		--anatomy-top: color-mix(in oklab, var(--c) 20%, #ffffff);
+		--anatomy-shade-3: color-mix(in oklab, var(--c) 26%, #f4f4f1);
+		--anatomy-shade-2: color-mix(in oklab, var(--c) 30%, #ededea);
+		--anatomy-shade-1: color-mix(in oklab, var(--c) 40%, #e5e5e2);
+		--anatomy-shade-0: color-mix(in oklab, var(--c) 50%, #dcdcd9);
+		--anatomy-hi: color-mix(in oklab, var(--c) 55%, var(--anatomy-strong));
+	}
+	@media (prefers-color-scheme: light) {
+		:root:not([data-theme]) .rd-t {
+			--anatomy-top: color-mix(in oklab, var(--c) 20%, #ffffff);
+			--anatomy-shade-3: color-mix(in oklab, var(--c) 26%, #f4f4f1);
+			--anatomy-shade-2: color-mix(in oklab, var(--c) 30%, #ededea);
+			--anatomy-shade-1: color-mix(in oklab, var(--c) 40%, #e5e5e2);
+			--anatomy-shade-0: color-mix(in oklab, var(--c) 50%, #dcdcd9);
+			--anatomy-hi: color-mix(in oklab, var(--c) 55%, var(--anatomy-strong));
+		}
+	}
+
+	/* Cordones: borde oscuro, cuerpo en su color y un brillo fino; grosor real, no de línea. */
+	.iso-svg .rd-cord path {
+		fill: none;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		vector-effect: none;
+	}
+	.rd-cord-edge {
+		stroke: var(--rd-edge);
+	}
+	.rd-cord-body {
+		stroke: color-mix(in oklab, var(--c) 78%, #101010);
+	}
+	.rd-cord-shine {
+		stroke: color-mix(in oklab, var(--c) 55%, #ffffff);
+		opacity: 0.55;
+	}
+	:root[data-theme='light'] .rd-cord-body {
+		stroke: var(--c);
+	}
+	@media (prefers-color-scheme: light) {
+		:root:not([data-theme]) .rd-cord-body {
+			stroke: var(--c);
+		}
+	}
+
+	/* Detalle de las caras frontales. */
+	.rd-port {
+		fill: var(--rd-hole);
+	}
+	.rd-slot {
+		fill: var(--rd-slot);
+	}
+	.rd-port,
+	.rd-bay,
+	.rd-lcd {
+		stroke: var(--anatomy-lo);
+		stroke-width: var(--anatomy-weight);
+		vector-effect: non-scaling-stroke;
+	}
+	.rd-bay {
+		fill: none;
+	}
+	.rd-screw-head,
+	.rd-button {
+		fill: var(--anatomy-shade-1);
+		stroke: var(--anatomy-mid);
+		stroke-width: var(--anatomy-weight);
+	}
+	.rd-band-v10 {
+		fill: var(--rd-v10);
+	}
+	.rd-band-v20 {
+		fill: var(--rd-v20);
+	}
+	.rd-band-isp {
+		fill: var(--rd-wan);
+	}
+	.rd-band-con {
+		fill: var(--rd-con);
+	}
+	.rd-lcd {
+		fill: var(--rd-lcd);
+	}
+	.rd-lcd-text {
+		fill: var(--rd-lcd-ink);
+		font-family: var(--anatomy-mono);
+	}
+	.rd-lcd-bar {
+		fill: var(--rd-lcd-ink);
+	}
+	.iso-svg .rd-logo-line {
+		fill: none;
+		stroke: #ffffff;
+		stroke-width: 0.9;
+		stroke-linecap: round;
+		vector-effect: none;
+	}
+	.rd-logo-ink {
+		fill: #ffffff;
+	}
+	.rd-logo-hole {
+		fill: var(--rd-hole);
+	}
+	.rd-led {
+		fill: var(--rd-led-off);
+	}
+	.rd-led[data-on][data-c='green'] {
+		fill: var(--rd-led-green);
+	}
+	.rd-led[data-on][data-c='amber'] {
+		fill: var(--rd-led-amber);
+	}
+	.rd-led[data-on][data-c='red'] {
+		fill: var(--rd-led-red);
+	}
+	.rd-led[data-on][data-c='blue'] {
+		fill: var(--rd-led-blue);
+	}
+
+	/* Paquetes: núcleo y halo. Sin JS, el color sale del estado; en vivo, el script lo funde. */
+	.rd-pk-halo {
+		opacity: 0.22;
+	}
+	.rd-pk[data-code='0'] circle {
+		fill: var(--rd-pk-0);
+	}
+	.rd-pk[data-code='1'] circle {
+		fill: var(--rd-pk-1);
+	}
+	.rd-pk[data-code='2'] circle {
+		fill: var(--rd-pk-2);
+	}
+	.rd-pk[data-code='3'] circle {
+		fill: var(--rd-pk-3);
+	}
+	.rd-pk[data-code='4'] circle {
+		fill: var(--rd-pk-4);
+	}
+	.rd-pk[data-code='5'] circle {
+		fill: var(--rd-pk-5);
+	}
+
+	.rd-keys {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.25rem 1rem;
+		color: var(--anatomy-muted);
+		font-family: var(--anatomy-mono);
+		font-size: 10.5px;
+		line-height: 1.4;
+	}
+	.rd-key {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		white-space: pre;
+	}
+	.rd-key::before {
+		content: '';
+		width: 8px;
+		height: 8px;
+		border-radius: 2px;
+		background: var(--k);
+	}
+	.rd-key[data-brand='cisco'] {
+		--k: var(--rd-cisco);
+	}
+	.rd-key[data-brand='route'] {
+		--k: var(--rd-route);
+	}
+	.rd-key[data-brand='fw'] {
+		--k: var(--rd-fw);
+	}
+	.rd-key[data-brand='v10'] {
+		--k: linear-gradient(90deg, var(--rd-v10) 50%, var(--rd-v20) 50%);
+	}
+	.rd-key[data-brand='rust'] {
+		--k: var(--rd-rust);
+	}
+	@media (max-width: 560px) {
+		.rd-plate {
+			padding: 26px 6px 52px;
+		}
+		.rd-key .rd-role {
+			display: none;
+		}
+	}
+</style>

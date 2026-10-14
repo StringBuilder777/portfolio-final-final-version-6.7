@@ -6,7 +6,7 @@ const year = new Date().getFullYear();
 
 <footer class="footer">
 	<div class="container inner">
-		<p>© {year} {site.name}</p>
+		<p>© {year} {site.name} · <a href="/licenses/anatomy.txt">Licencias</a></p>
 		<ul>
 			{site.links.map((link) => (
 				<li><a href={link.href} rel="noopener noreferrer" target="_blank">{link.label}</a></li>

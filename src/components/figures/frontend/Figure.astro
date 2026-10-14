@@ -1,0 +1,277 @@
+---
+// Figura del área Frontend: arquitectura de islas como una imprenta. La geometría se calcula
+// aquí, en build; el navegador solo recibe SVG y, al entrar en pantalla, el script de movimiento.
+import '@/lib/iso/iso.css';
+import '@/lib/iso/theme.css';
+import { figureSvg } from '@/lib/iso/iso-kit';
+import { build, H, W } from './geometry';
+import { BLOCKS, ISLANDS, LOGOS, STILL_T, poseAt } from './model';
+
+const { back, front, label, data } = build();
+const backSvg = figureSvg({ width: W, height: H, label, body: back, className: 'fe-layer' });
+const frontSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="iso-svg fe-layer" viewBox="0 0 ${W} ${H}" aria-hidden="true">${front}</svg>`;
+const readout = `${LOGOS[0].name} · ${poseAt(STILL_T, 'islas').phase} · JS en ${ISLANDS}/${BLOCKS.length} bloques`;
+const keys = [
+	{ brand: 'astro', name: 'Astro', role: 'prensa que estampa HTML' },
+	{ brand: 'ts', name: 'TypeScript', role: 'tipos' },
+	{ brand: 'js', name: 'JavaScript', role: 'logos impresos' },
+	{ brand: 'css', name: 'CSS', role: 'tinta' },
+	{ brand: 'react', name: 'React', role: 'islas que se encienden' },
+];
+---
+
+<figure class="fe-fig iso" data-figure="frontend" data-mode="islas" data-sheet={LOGOS[0].id} data-tray={LOGOS[LOGOS.length - 1].id} data-live={JSON.stringify(data)}>
+	<div class="iso-plate fe-plate">
+		<div class="iso-plate-corners">
+			<span class="iso-plate-corner" data-corner="fig" aria-hidden="true">Fig 1</span>
+			<span class="iso-plate-corner" data-corner="title" aria-hidden="true">Imprenta de islas</span>
+			<span class="iso-plate-corner" data-corner="hint" aria-hidden="true">Clic: islas ↔ SPA</span>
+			<span class="iso-plate-corner" data-corner="readout" data-readout>{readout}</span>
+		</div>
+		<div class="fe-stage" style={`--ar:${W / H}`}>
+			<Fragment set:html={backSvg} />
+			<canvas class="fe-layer fe-gl" aria-hidden="true"></canvas>
+			<Fragment set:html={frontSvg} />
+			<button
+				class="fe-layer fe-hit"
+				type="button"
+				hidden
+				aria-pressed="false"
+				aria-label="Alternar entre arquitectura de islas (solo se hidratan las piezas interactivas) y SPA (se hidrata la página entera)"
+			></button>
+		</div>
+	</div>
+	<figcaption class="fe-keys">
+		{keys.map((key) => <span class="fe-key" data-brand={key.brand}>{key.name}<span class="fe-role"> · {key.role}</span></span>)}
+	</figcaption>
+</figure>
+
+<script>
+	// Arranque mínimo: el movimiento y WebGL se descargan solo cuando la figura se acerca a la pantalla.
+	for (const root of document.querySelectorAll<HTMLElement>('[data-figure="frontend"]')) {
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (!entries.some((entry) => entry.isIntersecting)) return;
+				io.disconnect();
+				import('./live')
+					.then(({ mount }) => mount(root))
+					.catch((error) => console.error('[figura frontend]', error));
+			},
+			{ rootMargin: '200px 0px' },
+		);
+		io.observe(root);
+	}
+</script>
+
+<style is:global>
+	.fe-fig {
+		--fe-astro: #ff7a2e;
+		--fe-ts: #4f94dc;
+		--fe-css: #9a6ad8;
+		--fe-react: #61dafb;
+		--fe-island: #61dafb;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		height: 100%;
+		margin: 0;
+	}
+	:root[data-theme='light'] .fe-fig {
+		--fe-astro: #ff5d01;
+		--fe-ts: #3178c6;
+		--fe-css: #663399;
+		--fe-react: #0a9fc9;
+		--fe-island: #4fd2f5;
+	}
+	@media (prefers-color-scheme: light) {
+		:root:not([data-theme]) .fe-fig {
+			--fe-astro: #ff5d01;
+			--fe-ts: #3178c6;
+			--fe-css: #663399;
+			--fe-react: #0a9fc9;
+			--fe-island: #4fd2f5;
+		}
+	}
+
+	.fe-plate {
+		flex: 1;
+		min-height: 0;
+		padding: 28px 10px;
+		container-type: size;
+	}
+	.fe-stage {
+		position: relative;
+		width: min(100cqw, 100cqh * var(--ar));
+		aspect-ratio: var(--ar);
+		margin: auto;
+	}
+	.fe-hit {
+		padding: 0;
+		border: 0;
+		border-radius: 4px;
+		background: none;
+		cursor: pointer;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.fe-hit[hidden] {
+		display: none;
+	}
+	.fe-hit:focus-visible {
+		outline: 1px solid var(--anatomy-mid);
+		outline-offset: 4px;
+	}
+	.fe-layer {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.fe-gl {
+		pointer-events: none;
+		mix-blend-mode: screen;
+	}
+	:root[data-theme='light'] .fe-gl {
+		mix-blend-mode: normal;
+	}
+	@media (prefers-color-scheme: light) {
+		:root:not([data-theme]) .fe-gl {
+			mix-blend-mode: normal;
+		}
+	}
+
+	/* Piezas teñidas con el color de cada tecnología: mismos cuatro tonos del kit, en su color. */
+	.fe-t[data-brand='astro'] {
+		--c: var(--fe-astro);
+	}
+	.fe-t[data-brand='ts'] {
+		--c: var(--fe-ts);
+	}
+	.fe-t[data-brand='css'] {
+		--c: var(--fe-css);
+	}
+	.fe-t[data-brand='react'] {
+		--c: var(--fe-react);
+	}
+	.fe-t {
+		--anatomy-top: color-mix(in oklab, var(--c) 46%, #1c1c1c);
+		--anatomy-shade-3: color-mix(in oklab, var(--c) 40%, #181818);
+		--anatomy-shade-2: color-mix(in oklab, var(--c) 34%, #151515);
+		--anatomy-shade-1: color-mix(in oklab, var(--c) 28%, #121212);
+		--anatomy-shade-0: color-mix(in oklab, var(--c) 22%, #0f0f0f);
+		--anatomy-hi: color-mix(in oklab, var(--c) 70%, var(--anatomy-strong));
+		--anatomy-mid: color-mix(in oklab, var(--c) 60%, var(--anatomy-paper));
+		--anatomy-lo: color-mix(in oklab, var(--c) 40%, var(--anatomy-paper));
+		--anatomy-faint: color-mix(in oklab, var(--c) 25%, var(--anatomy-paper));
+	}
+	:root[data-theme='light'] .fe-t {
+		--anatomy-top: color-mix(in oklab, var(--c) 20%, #ffffff);
+		--anatomy-shade-3: color-mix(in oklab, var(--c) 30%, #f4f4f1);
+		--anatomy-shade-2: color-mix(in oklab, var(--c) 38%, #ededea);
+		--anatomy-shade-1: color-mix(in oklab, var(--c) 46%, #e5e5e2);
+		--anatomy-shade-0: color-mix(in oklab, var(--c) 54%, #dcdcd9);
+		--anatomy-hi: color-mix(in oklab, var(--c) 55%, var(--anatomy-strong));
+	}
+	@media (prefers-color-scheme: light) {
+		:root:not([data-theme]) .fe-t {
+			--anatomy-top: color-mix(in oklab, var(--c) 20%, #ffffff);
+			--anatomy-shade-3: color-mix(in oklab, var(--c) 30%, #f4f4f1);
+			--anatomy-shade-2: color-mix(in oklab, var(--c) 38%, #ededea);
+			--anatomy-shade-1: color-mix(in oklab, var(--c) 46%, #e5e5e2);
+			--anatomy-shade-0: color-mix(in oklab, var(--c) 54%, #dcdcd9);
+			--anatomy-hi: color-mix(in oklab, var(--c) 55%, var(--anatomy-strong));
+		}
+	}
+
+	.fe-ink {
+		fill: var(--anatomy-mid);
+		stroke: none;
+	}
+	.fe-ink-css {
+		fill: var(--fe-css);
+	}
+	.fe-island {
+		fill: var(--fe-island);
+		stroke: none;
+	}
+	/* Logos impresos: solo se ve el de la hoja en curso y el de la última hoja entregada. */
+	.fe-logos [data-logo] {
+		display: none;
+	}
+	.fe-fig[data-sheet='ts'] [data-set='sheet'] [data-logo='ts'],
+	.fe-fig[data-tray='ts'] [data-set='tray'] [data-logo='ts'],
+	.fe-fig[data-sheet='astro'] [data-set='sheet'] [data-logo='astro'],
+	.fe-fig[data-tray='astro'] [data-set='tray'] [data-logo='astro'],
+	.fe-fig[data-sheet='js'] [data-set='sheet'] [data-logo='js'],
+	.fe-fig[data-tray='js'] [data-set='tray'] [data-logo='js'],
+	.fe-fig[data-sheet='react'] [data-set='sheet'] [data-logo='react'],
+	.fe-fig[data-tray='react'] [data-set='tray'] [data-logo='react'] {
+		display: inline;
+	}
+	.fe-mono-line {
+		fill: none;
+		stroke: var(--anatomy-mid);
+		stroke-width: var(--anatomy-weight);
+		vector-effect: non-scaling-stroke;
+	}
+	.fe-mono-fill {
+		fill: var(--anatomy-mid);
+	}
+	/* La pila de salida muestra la última página tal como salió: en SPA, con todo hidratado. */
+	.fe-spa-only {
+		opacity: 0;
+		transition: opacity 0.4s;
+	}
+	[data-mode='spa'] .fe-spa-only {
+		opacity: 1;
+	}
+	.fe-led circle {
+		fill: var(--fe-island);
+	}
+
+	.fe-keys {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.25rem 1rem;
+		color: var(--anatomy-muted);
+		font-family: var(--anatomy-mono);
+		font-size: 10.5px;
+		line-height: 1.4;
+	}
+	.fe-key {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		white-space: pre;
+	}
+	.fe-key::before {
+		content: '';
+		width: 8px;
+		height: 8px;
+		border-radius: 2px;
+		background: var(--k);
+	}
+	.fe-key[data-brand='astro'] {
+		--k: var(--fe-astro);
+	}
+	.fe-key[data-brand='ts'] {
+		--k: var(--fe-ts);
+	}
+	.fe-key[data-brand='js'] {
+		--k: #f7df1e;
+	}
+	.fe-key[data-brand='css'] {
+		--k: var(--fe-css);
+	}
+	.fe-key[data-brand='react'] {
+		--k: var(--fe-react);
+	}
+	@media (max-width: 560px) {
+		.fe-plate {
+			padding: 26px 6px 52px;
+		}
+		.fe-key .fe-role {
+			display: none;
+		}
+	}
+</style>
