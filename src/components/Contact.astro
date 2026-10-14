@@ -1,0 +1,19 @@
+---
+import { site } from '@/config/site';
+---
+
+<section id="contacto" class="container section">
+	<h2>Contacto</h2>
+	<p>¿Tienes un proyecto o una oportunidad? Escríbeme.</p>
+	<a class="email" href={`mailto:${site.email}`}>{site.email}</a>
+</section>
+
+<style>
+	p {
+		color: var(--muted);
+	}
+	.email {
+		font-size: 1.25rem;
+		font-weight: 500;
+	}
+</style>

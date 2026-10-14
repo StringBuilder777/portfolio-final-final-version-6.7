@@ -1,0 +1,58 @@
+---
+// Script nativo en vez de isla React: evita enviar ~65 KB de runtime por un solo botón.
+---
+
+<button type="button" class="theme-toggle" aria-label="Tema oscuro" aria-pressed="false">
+	<span class="icon-dark" aria-hidden="true">☾</span>
+	<span class="icon-light" aria-hidden="true">☀</span>
+</button>
+
+<style>
+	.theme-toggle {
+		/* Oculto sin JS: el tema solo se puede cambiar si el script corre */
+		display: none;
+		width: 2.25rem;
+		height: 2.25rem;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		background: transparent;
+		color: var(--fg);
+		cursor: pointer;
+	}
+	:global([data-theme]) .theme-toggle {
+		display: inline-block;
+	}
+	.icon-light,
+	:global([data-theme='dark']) .icon-dark {
+		display: none;
+	}
+	:global([data-theme='dark']) .icon-light {
+		display: inline;
+	}
+</style>
+
+<script>
+	type Theme = 'light' | 'dark';
+
+	const root = document.documentElement;
+	const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+	const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+
+	const sync = (theme: Theme) => {
+		button?.setAttribute('aria-pressed', String(theme === 'dark'));
+		themeColor?.setAttribute('content', theme === 'dark' ? '#09090b' : '#ffffff');
+	};
+
+	sync(root.dataset.theme === 'dark' ? 'dark' : 'light');
+
+	button?.addEventListener('click', () => {
+		const next: Theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+		root.dataset.theme = next;
+		sync(next);
+		try {
+			localStorage.setItem('theme', next);
+		} catch {
+			// Almacenamiento bloqueado: el tema se aplica pero no se recuerda
+		}
+	});
+</script>
