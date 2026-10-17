@@ -38,8 +38,8 @@ export interface Site {
 }
 
 export const site: Site = {
-	name: 'Tu Nombre',
-	role: 'Desarrollador Full Stack',
+	name: 'Luis Emilaino Garcia Sifuentes',
+	role: 'Desarrollador Full Stock',
 	description: 'Portafolio de desarrollo web: proyectos, experiencia y contacto.',
 	email: 'hola@example.com',
 	lang: 'es',
