@@ -1,9 +1,18 @@
 ---
 import { site } from '@/config/site';
+import NfcFigure from '@/components/project-nfc/Figure.astro';
 ---
 
 <section id="proyectos" class="container section">
 	<h2>Proyectos</h2>
+	<article class="staff-project">
+		<div>
+			<h3>Staff App</h3>
+			<p>Aplicación para registrar accesos en eventos mediante gafetes NFC.</p>
+			<ul class="tags"><li>Flutter</li><li>NFC</li><li>Supabase</li></ul>
+		</div>
+		<NfcFigure />
+	</article>
 	<ul class="grid">
 		{site.projects.map((project) => (
 			<li class="card">
@@ -22,6 +31,16 @@ import { site } from '@/config/site';
 </section>
 
 <style>
+	.staff-project {
+		display: grid;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+		align-items: center;
+		gap: 2.5rem;
+		margin-bottom: 1.25rem;
+	}
+	@media (max-width: 768px) {
+		.staff-project { grid-template-columns: 1fr; gap: 1rem; }
+	}
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
