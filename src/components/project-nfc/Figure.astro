@@ -1,0 +1,56 @@
+---
+import '@/lib/iso/iso.css';
+import '@/lib/iso/theme.css';
+import { build } from './geometry';
+const { svg, x, y, dx, dy } = build();
+---
+<figure class="nfc-figure iso" data-nfc-figure data-x={x} data-y={y} data-dx={dx} data-dy={dy}>
+	<div class="iso-plate nfc-plate">
+		<div class="iso-plate-corners">
+			<span class="iso-plate-corner" data-corner="fig" aria-hidden="true">NFC</span>
+			<span class="iso-plate-corner" data-corner="title" aria-hidden="true">Registro de acceso</span>
+			<span class="iso-plate-corner" data-corner="readout" data-readout>Acercando gafete</span>
+		</div>
+		<Fragment set:html={svg} />
+	</div>
+	<figcaption>Lectura de gafete y confirmación de registro.</figcaption>
+</figure>
+<script>
+	for (const root of document.querySelectorAll<HTMLElement>('[data-nfc-figure]')) {
+		const observer = new IntersectionObserver((entries) => {
+			if (!entries.some((entry) => entry.isIntersecting)) return;
+			observer.disconnect();
+			import('./live').then(({ mount }) => mount(root)).catch(console.error);
+		}, { rootMargin: '200px 0px' });
+		observer.observe(root);
+	}
+</script>
+<style is:global>
+	.nfc-figure { margin: 0; min-width: 0; }
+	.nfc-plate { padding: 30px 12px; background: transparent; box-shadow: none; }
+	.nfc-figure .iso-svg { width: min(100%, 26rem); margin-inline: auto; }
+	.nfc-figure figcaption { color: var(--muted); font-size: .8rem; margin-top: .5rem; }
+	.nfc-figure .nfc-success { opacity: 0; }
+	.nfc-figure .nfc-success, .nfc-figure .nfc-wait { transition: opacity .3s ease; }
+	.nfc-figure[data-registered] .nfc-success { opacity: 1; }
+	.nfc-figure[data-registered] .nfc-wait { opacity: 0; }
+	.nfc-figure .nfc-success .iso-face-text { fill: #16a34a; }
+	.nfc-figure[data-registered] [data-readout] { color: #16a34a; }
+	.nfc-figure .nfc-ribbon-edge, .nfc-figure .nfc-ribbon, .nfc-figure .nfc-ribbon-stitch { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+	.nfc-figure .nfc-ribbon-edge { stroke: var(--anatomy-hi); stroke-width: 10; }
+	.nfc-figure .nfc-ribbon { stroke: var(--anatomy-shade-1); stroke-width: 8; }
+	.nfc-figure .nfc-ribbon-stitch { stroke: var(--anatomy-mid); stroke-width: .7; stroke-dasharray: 2 3; }
+	.nfc-figure .nfc-signal { opacity: 0; transition: opacity .25s ease; }
+	.nfc-figure[data-scanning] .nfc-signal { opacity: 1; }
+	.nfc-figure .nfc-wave { fill: none; stroke: #16a34a; stroke-width: 1.6; opacity: .7; }
+	.nfc-figure[data-scanning] .nfc-wave { animation: nfc-pulse 1.35s ease-out infinite; }
+	.nfc-figure .nfc-wave-1 { animation-delay: .2s; }
+	.nfc-figure .nfc-wave-2 { animation-delay: .4s; }
+	@keyframes nfc-pulse { 0%, 100% { opacity: .12; } 35% { opacity: .9; } }
+	@media (prefers-reduced-motion: reduce) {
+		.nfc-figure .nfc-success, .nfc-figure .nfc-wait { transition: none; }
+		.nfc-figure[data-scanning] .nfc-wave { animation: none; }
+		.nfc-figure .nfc-success { opacity: 1; }
+		.nfc-figure .nfc-wait { opacity: 0; }
+	}
+</style>
