@@ -28,7 +28,7 @@ for (const id of Object.keys(figures)) {
 						<h3>{area.title}</h3>
 						<p>{area.summary}</p>
 						<ul class="techs">
-							{area.techs.map((tech) => <li>{tech}</li>)}
+							{area.techs.map((tech) => <li>{area.id === 'redes' && (tech === 'Cisco IOS' || tech === 'Packet Tracer') ? <button type="button" class="tech-button" data-network-detail={tech}>{tech}</button> : tech}</li>)}
 						</ul>
 					</div>
 					<div class="figure-slot">
@@ -85,6 +85,21 @@ for (const id of Object.keys(figures)) {
 		padding: 0.15rem 0.5rem;
 		border: 1px solid var(--border);
 		border-radius: 999px;
+	}
+	.techs li:has(.tech-button) { padding: 0; }
+	.tech-button {
+		padding: 0.15rem 0.5rem;
+		border: 0;
+		border-radius: inherit;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	.tech-button:hover, .tech-button:focus-visible {
+		background: var(--surface);
+		outline: 2px solid var(--muted);
+		outline-offset: 2px;
 	}
 	.figure-slot {
 		min-width: 0;
