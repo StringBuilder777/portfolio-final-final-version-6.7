@@ -20,10 +20,8 @@ const keys = [
 ---
 
 <figure class="rd-fig iso" data-figure="redes" data-mode="acl" data-live={JSON.stringify(data)}>
-	<div class="iso-plate rd-plate">
+	<div class="rd-plate">
 		<div class="iso-plate-corners">
-			<span class="iso-plate-corner" data-corner="fig" aria-hidden="true">Fig 3</span>
-			<span class="iso-plate-corner" data-corner="title" aria-hidden="true">Rack de enrutamiento</span>
 			<span class="iso-plate-corner" data-corner="hint" aria-hidden="true">Clic: ACL ↔ sin ACL</span>
 			<span class="iso-plate-corner" data-corner="readout" data-readout>{readout}</span>
 		</div>
@@ -185,6 +183,7 @@ const keys = [
 	}
 
 	.rd-plate {
+		position: relative;
 		flex: 1;
 		min-height: 0;
 		padding: 22px 0 24px;

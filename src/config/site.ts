@@ -79,9 +79,9 @@ export const site: Site = {
 		{
 			id: 'backend',
 			title: 'Backend',
-			summary: 'APIs y servicios fiables, con colas y datos bien modelados.',
-			concept: 'Ciclo de una petición: una clasificadora de correo que recibe, enruta, procesa en cola y despacha respuestas.',
-			techs: ['Node.js', 'SQL', 'REST'],
+			summary: 'Servicios con Rust, Java/Quarkus y PHP/Laravel; datos con MySQL y PostgreSQL, y autenticación con Supabase.',
+			concept: 'Ciclo de una petición: un banco de servidores compactos conectado por pistas a depósitos cilíndricos de discos; una petición simulada recorre los servicios y vuelve tras leer o escribir datos.',
+			techs: ['Rust', 'REST', 'Java', 'Quarkus', 'PHP', 'Laravel', 'MySQL', 'PostgreSQL', 'Supabase'],
 		},
 		{
 			id: 'redes',

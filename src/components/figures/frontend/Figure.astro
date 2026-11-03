@@ -21,10 +21,8 @@ const keys = [
 ---
 
 <figure class="fe-fig iso" data-figure="frontend" data-mode="islas" data-sheet={LOGOS[0].id} data-tray={LOGOS[LOGOS.length - 1].id} data-live={JSON.stringify(data)}>
-	<div class="iso-plate fe-plate">
+	<div class="fe-plate">
 		<div class="iso-plate-corners">
-			<span class="iso-plate-corner" data-corner="fig" aria-hidden="true">Fig 1</span>
-			<span class="iso-plate-corner" data-corner="title" aria-hidden="true">Imprenta de islas</span>
 			<span class="iso-plate-corner" data-corner="hint" aria-hidden="true">Clic: islas ↔ SPA</span>
 			<span class="iso-plate-corner" data-corner="readout" data-readout>{readout}</span>
 		</div>
@@ -94,6 +92,7 @@ const keys = [
 	}
 
 	.fe-plate {
+		position: relative;
 		flex: 1;
 		min-height: 0;
 		padding: 22px 0 24px;
