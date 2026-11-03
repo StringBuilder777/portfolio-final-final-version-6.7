@@ -47,3 +47,9 @@ import Contador from '@/components/Contador.tsx';
 ---
 <Contador client:visible />  <!-- hidrata solo al entrar en pantalla -->
 ```
+
+## Secciones y certificaciones
+
+La portada enlaza a `/stack/`, `/proyectos/`, `/certificaciones/`, `/sobre-mi/` y `/contacto/`. En Inicio o Stack, selecciona un diagrama para abrir sus tecnologías. Las figuras conservan su simulación SVG original. Al abrir Frontend se muestra earthrise de ascii.rest como fondo animado, cargado bajo demanda y detenido al cerrar. Los diagramas aún no creados se indican como próximos.
+
+El panel `/admin/` permite gestionar certificaciones con Supabase. Configuración y despliegue en Vercel Hobby: [guía](docs/certificaciones-y-deploy.md). Ejecuta `pnpm test` para las pruebas de navegador (requiere Chromium de Playwright: `pnpm exec playwright install chromium`).

@@ -1,22 +1,28 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import Header from '@/components/Header.astro';
+import SectionLayout from '@/layouts/SectionLayout.astro';
 import Hero from '@/components/Hero.astro';
 import Stack from '@/components/Stack.astro';
-import Projects from '@/components/Projects.astro';
-import About from '@/components/About.astro';
-import Contact from '@/components/Contact.astro';
-import Footer from '@/components/Footer.astro';
+const sections = [
+ { title: 'Proyectos', href: '/proyectos/', description: 'Una selección de proyectos de desarrollo web.' },
+ { title: 'Certificaciones', href: '/certificaciones/', description: 'Mis certificaciones y documentos relevantes.' },
+];
 ---
-
-<BaseLayout>
-	<Header />
-	<main id="main">
-		<Hero />
-		<Stack />
-		<Projects />
-		<About />
-		<Contact />
-	</main>
-	<Footer />
-</BaseLayout>
+<SectionLayout>
+ <Hero />
+ <Stack />
+ <nav class="container sections" aria-label="Explorar portafolio">
+  {sections.map((section) => <a href={section.href}>
+   <strong>{section.title}</strong><span>{section.description}</span>
+   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6" /></svg>
+  </a>)}
+ </nav>
+</SectionLayout>
+<style>
+ .sections { padding-bottom: 4rem; }
+ .sections a { display: grid; grid-template-columns: 11rem 1fr 24px; gap: 1.5rem; align-items: center; border-top: 1px solid var(--border); padding: 1.25rem 0; text-decoration: none; }
+ .sections a:last-child { border-bottom: 1px solid var(--border); }
+ .sections a:hover strong { text-decoration: underline; }
+ .sections strong { font-size: 1.15rem; }
+ .sections span { color: var(--muted); }
+ @media(max-width: 600px) { .sections a { grid-template-columns: 1fr 24px; gap: 0.25rem 1rem; } .sections span { grid-row: 2; } .sections svg { grid-column: 2; grid-row: 1 / 3; } }
+</style>

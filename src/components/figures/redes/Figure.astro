@@ -43,10 +43,10 @@ const keys = [
 	<figcaption class="rd-keys">
 		{keys.map((key) => <span class="rd-key" data-brand={key.brand}>{key.name}<span class="rd-role"> · {key.role}</span></span>)}
 	</figcaption>
-	<dialog class="rd-detail" aria-labelledby="rd-detail-title" aria-describedby="rd-detail-description">
+	<section class="rd-detail" hidden aria-labelledby="rd-detail-title" aria-describedby="rd-detail-description">
 		<div class="rd-detail-header">
 			<p class="rd-detail-eyebrow">Redes / Equipos Cisco</p>
-			<form method="dialog"><button class="rd-detail-close" aria-label="Cerrar detalle">×</button></form>
+			<button type="button" class="rd-detail-close" aria-label="Volver al rack">←</button>
 		</div>
 		<h3 id="rd-detail-title"></h3>
 		<p id="rd-detail-description"></p>
@@ -55,27 +55,42 @@ const keys = [
 			<g class="rd-detail-equipment" set:html={ciscoDevices()} />
 		</svg>
 		<p class="rd-detail-caption">Switch Catalyst 2960 <span aria-hidden="true">·</span> Router ISR 1100</p>
-	</dialog>
+	</section>
 </figure>
 
 <script>
 	// Arranque mínimo: el movimiento y WebGL se descargan solo cuando la figura se acerca a la pantalla.
 	for (const root of document.querySelectorAll<HTMLElement>('[data-figure="redes"]')) {
-		const dialog = root.querySelector<HTMLDialogElement>('.rd-detail');
+		const detail = root.querySelector<HTMLElement>('.rd-detail');
+		let trigger: HTMLButtonElement | null = null;
+		const resetDetail = () => {
+			delete root.dataset.detail;
+			if (detail) detail.hidden = true;
+		};
+		root.querySelector<HTMLButtonElement>('.rd-detail-close')?.addEventListener('click', () => {
+			resetDetail(); trigger?.focus({ preventScroll: true });
+		});
+		// El contenedor se mueve a la ventana al abrirse; delegar el cierre en captura.
+		document.addEventListener('close', (event) => {
+			if (event.target instanceof HTMLDialogElement && event.target.contains(root)) resetDetail();
+		}, true);
 		const title = root.querySelector<HTMLElement>('#rd-detail-title');
 		const description = root.querySelector<HTMLElement>('#rd-detail-description');
 		const svg = root.querySelector<SVGSVGElement>('.rd-detail-svg');
 		const equipment = root.querySelector<SVGGElement>('.rd-detail-equipment');
 		for (const button of document.querySelectorAll<HTMLButtonElement>('[data-network-detail]')) {
 			button.addEventListener('click', () => {
-				if (!dialog || !title || !description || !svg || !equipment) return;
+				if (!detail || !title || !description || !svg || !equipment) return;
+				trigger = button;
 				const isIos = button.dataset.networkDetail === 'Cisco IOS';
 				title.textContent = isIos ? 'Cisco IOS' : 'Packet Tracer';
 				description.textContent = isIos
 					? 'Configuración de switches y routers Cisco: interfaces, VLAN, enrutamiento y acceso seguro.'
 					: 'Simulación de redes con switches y routers Cisco para practicar topologías, conexiones y configuración.';
 				const source = root.querySelector('.rd-stage')?.getBoundingClientRect();
-				dialog.showModal();
+				detail.hidden = false;
+				root.dataset.detail = 'open';
+				root.querySelector<HTMLButtonElement>('.rd-detail-close')?.focus({ preventScroll: true });
 				if (source && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
 					const target = svg.getBoundingClientRect();
 					svg.animate([
@@ -214,18 +229,15 @@ const keys = [
 		--anatomy-paper: var(--bg);
 		container-type: size;
 	}
+	.rd-fig[data-detail='open'] > .rd-plate, .rd-fig[data-detail='open'] > .rd-keys { display: none; }
 	.rd-detail {
-		width: min(1100px, calc(100% - 2rem));
-		max-height: calc(100dvh - 2rem);
-		overflow: auto;
-		padding: clamp(1.25rem, 4vw, 2rem);
-		border: 1px solid var(--border);
-		border-radius: 1rem;
-		background: var(--bg);
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
 		color: var(--anatomy-strong);
-		box-shadow: 0 24px 80px #0008;
 	}
-	.rd-detail::backdrop { background: #000a; }
 	.rd-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 	.rd-detail-eyebrow, .rd-detail-caption { color: var(--anatomy-muted); font: 0.75rem var(--anatomy-mono); }
 	.rd-detail-eyebrow { margin: 0; text-transform: uppercase; letter-spacing: 0.08em; }
@@ -233,18 +245,18 @@ const keys = [
 	.rd-detail-close:focus-visible { outline: 2px solid var(--rd-cisco); outline-offset: 3px; }
 	.rd-detail h3 { margin: 0.75rem 0 0.5rem; font-size: 1.5rem; }
 	.rd-detail #rd-detail-description { margin: 0; color: var(--anatomy-muted); line-height: 1.5; }
-	.rd-detail-svg { display: block; width: 100%; height: auto; max-height: 65vh; margin: 1.5rem auto 0; overflow: visible; }
+	.rd-detail-svg { display: block; width: 100%; height: auto; flex: 1; min-height: 0; max-height: 100%; margin: 0 auto; overflow: visible; }
 	.rd-detail-caption { text-align: center; margin: 0.5rem 0 0; }
 	.rd-detail-rack .rd-rack-cisco { visibility: hidden; }
-	.rd-detail[open] .rd-detail-rack { animation: rd-rack-dim 500ms 650ms both; }
+	.rd-fig[data-detail='open'] .rd-detail .rd-detail-rack { animation: rd-rack-dim 500ms 650ms both; }
 	.rd-detail-device { transform-box: fill-box; transform-origin: center; }
-	.rd-detail[open] .rd-detail-device-0 { animation: rd-extract-switch 900ms 650ms cubic-bezier(.2,.7,.2,1) both; }
-	.rd-detail[open] .rd-detail-device-1 { animation: rd-extract-router 900ms 800ms cubic-bezier(.2,.7,.2,1) both; }
+	.rd-fig[data-detail='open'] .rd-detail .rd-detail-device-0 { animation: rd-extract-switch 900ms 650ms cubic-bezier(.2,.7,.2,1) both; }
+	.rd-fig[data-detail='open'] .rd-detail .rd-detail-device-1 { animation: rd-extract-router 900ms 800ms cubic-bezier(.2,.7,.2,1) both; }
 	@keyframes rd-rack-dim { to { opacity: 0.22; } }
 	@keyframes rd-extract-switch { to { transform: translate(105px, -30px) scale(1.25); } }
 	@keyframes rd-extract-router { to { transform: translate(105px, 90px) scale(1.25); } }
 	@media (prefers-reduced-motion: reduce) {
-		.rd-detail[open] .rd-detail-rack, .rd-detail[open] .rd-detail-device { animation-duration: 0s; animation-delay: 0s; }
+		.rd-fig[data-detail='open'] .rd-detail .rd-detail-rack, .rd-fig[data-detail='open'] .rd-detail .rd-detail-device { animation-duration: 0s; animation-delay: 0s; }
 	}
 
 	.rd-stage {

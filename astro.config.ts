@@ -7,7 +7,7 @@ export default defineConfig({
 	// TODO: cambiar por el dominio real (necesario para sitemap y URLs canónicas)
 	site: 'https://example.com',
 	output: 'static',
-	integrations: [react(), sitemap()],
-	// Prefetch desactivado: con una sola página solo añade JS. Actívalo cuando haya más rutas:
+	integrations: [react(), sitemap({ filter: (page) => !page.endsWith('/admin/') && !page.endsWith('/admin') })],
+	// Prefetch desactivado para mantener ligera la navegación:
 	// prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 });

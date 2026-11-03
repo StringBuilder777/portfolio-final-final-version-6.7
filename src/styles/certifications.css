@@ -1,0 +1,29 @@
+.certificates { padding-block: 3rem; }
+.certificates h1 { font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.15; margin: 0; }
+.certificates .intro { color: var(--muted); margin: 0.75rem 0 2rem; }
+.cert-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.cert-workspace { display: grid; grid-template-columns: 1.1fr 1fr; gap: 2.5rem; margin-top: 2rem; }
+.cert-workspace > section { border-left: 1px solid var(--border); padding-left: 2rem; min-width: 0; }
+.certificates h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
+.cert-form { display: grid; gap: 1rem; max-width: 32rem; min-width: 0; }
+.cert-form label { display: grid; gap: 0.35rem; font-weight: 600; }
+.certificates input:not([type='checkbox']) { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 0.35rem; background: var(--bg); color: var(--fg); padding: 0.6rem; font: inherit; }
+.certificates input[type='file'] { font-size: 0.85rem; }
+.cert-form .check { display: flex; align-items: center; gap: 0.6rem; font-weight: 400; }
+.cert-form small, .cert-list p, #current-document { color: var(--muted); }
+.certificates button { padding: 0.55rem 0.9rem; border: 1px solid var(--border); border-radius: 0.35rem; font: inherit; font-size: 0.9rem; background: var(--bg); color: var(--fg); cursor: pointer; }
+.certificates button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+.certificates button:disabled { opacity: 0.55; cursor: wait; }
+.certificates :is(button, input):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.cert-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.cert-list article { padding: 1.25rem 0; border-top: 1px solid var(--border); overflow-wrap: anywhere; }
+.cert-list p { margin: 0.4rem 0 1rem; }
+#admin-status:empty, #cert-status:empty, #current-document:empty { display: none; }
+#admin-status, #cert-status { overflow-wrap: anywhere; }
+#refresh { margin-bottom: 1rem; }
+@media(max-width: 700px) {
+ .cert-workspace { grid-template-columns: 1fr; }
+ .cert-workspace > section { border-left: 0; border-top: 1px solid var(--border); padding: 1.5rem 0 0; }
+ .cert-heading { align-items: start; }
+ .cert-form { max-width: none; }
+}

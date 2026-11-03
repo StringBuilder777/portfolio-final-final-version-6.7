@@ -1,0 +1,59 @@
+---
+import SectionLayout from '@/layouts/SectionLayout.astro';
+import '@/styles/certifications.css';
+---
+<SectionLayout title="Certificaciones">
+ <section class="container section certificates">
+  <h1>Certificaciones</h1>
+  <p class="intro">Formación y credenciales que acompañan mi trabajo.</p>
+  <p id="cert-status" role="status">Cargando certificaciones…</p>
+  <div id="cert-list" class="cert-list"></div>
+  <button id="cert-more" hidden>Ver más</button>
+  <noscript>Activa JavaScript para consultar las certificaciones.</noscript>
+ </section>
+</SectionLayout>
+<script>
+ import { bucket, configured, getClient, safeUrl, textElement } from '@/lib/certifications/client';
+ const status = document.querySelector<HTMLElement>('#cert-status')!;
+ const list = document.querySelector<HTMLElement>('#cert-list')!;
+ const more = document.querySelector<HTMLButtonElement>('#cert-more')!;
+ if (!configured) status.textContent = 'Las certificaciones estarán disponibles próximamente.';
+ else {
+  const client = getClient();
+  let offset = 0;
+  async function load() {
+   more.disabled = true;
+   try {
+    const { data, error } = await client.from('certifications').select('*').eq('published', true).order('issued_on', { ascending: false, nullsFirst: false }).order('id').range(offset, offset + 11);
+    if (error) throw error;
+    for (const item of data) {
+     const row = textElement('article', '');
+     row.append(textElement('h2', item.title), textElement('p', [item.issuer, item.issued_on].filter(Boolean).join(' · ')));
+     const actions = textElement('div', ''); actions.className = 'cert-actions';
+     const href = safeUrl(item.verification_url);
+     if (href) { const link = textElement('a', 'Verificar credencial'); link.href = href; link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link); }
+     if (item.document_path) {
+      const button = textElement('button', 'Ver documento');
+      button.addEventListener('click', async () => {
+       button.disabled = true;
+       try {
+        const { data, error } = await client.storage.from(bucket).createSignedUrl(item.document_path!, 60);
+        if (error) throw error;
+        window.location.assign(data.signedUrl);
+       } catch { status.textContent = 'No se pudo abrir el documento. Inténtalo de nuevo.'; }
+       finally { button.disabled = false; }
+      });
+      actions.append(button);
+     }
+     row.append(actions); list.append(row);
+    }
+    offset += data.length;
+    status.textContent = offset ? '' : 'Todavía no hay certificaciones publicadas.';
+    more.textContent = 'Ver más'; more.hidden = data.length < 12;
+   } catch { status.textContent = 'No se pudieron cargar las certificaciones. Inténtalo de nuevo.'; more.hidden = false; more.textContent = 'Reintentar'; }
+   finally { more.disabled = false; }
+  }
+  more.addEventListener('click', () => void load());
+  void load();
+ }
+</script>

@@ -77,10 +77,10 @@ export function mount(root: HTMLElement) {
 	const button = root.querySelector<HTMLButtonElement>('.rd-hit');
 	const canvas = root.querySelector<HTMLCanvasElement>('.rd-gl');
 	const readout = root.querySelector<HTMLElement>('[data-readout]');
-	const slots: Slot[] = [...root.querySelectorAll<SVGGElement>('[data-pk]')].map((el) => ({ el, cores: [...el.querySelectorAll('circle')], n: -1, rgb: [1, 1, 1], x: 0, y: 0, a: 0 }));
+	const slots: Slot[] = [...root.querySelectorAll<SVGGElement>('.rd-stage [data-pk]')].map((el) => ({ el, cores: [...el.querySelectorAll('circle')], n: -1, rgb: [1, 1, 1], x: 0, y: 0, a: 0 }));
 	const pressed = () => button?.setAttribute('aria-pressed', String(mode === 'acl'));
 	// Mismo índice que en el build (orden en el documento) para que el parpadeo de fondo coincida.
-	const leds = [...root.querySelectorAll<SVGElement>('[data-led]')].map((el, index) => ({ el, key: el.dataset.led!, kind: el.dataset.k ?? 'link', index, on: el.hasAttribute('data-on') }));
+	const leds = [...root.querySelectorAll<SVGElement>('.rd-stage [data-led]')].map((el, index) => ({ el, key: el.dataset.led!, kind: el.dataset.k ?? 'link', index, on: el.hasAttribute('data-on') }));
 	if (!stage || slots.length < SLOTS) return;
 
 	const still = matchMedia('(prefers-reduced-motion: reduce)');
