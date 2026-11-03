@@ -1,6 +1,53 @@
 ---
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 import { site } from '@/config/site';
+import typescript, { meta as typescriptMeta } from 'ascii.rest/pieces/typescript';
+import php, { meta as phpMeta } from 'ascii.rest/pieces/php';
+import javascript, { meta as javascriptMeta } from 'ascii.rest/pieces/javascript';
+import html, { meta as htmlMeta } from 'ascii.rest/pieces/html';
+import css, { meta as cssMeta } from 'ascii.rest/pieces/css';
+import java, { meta as javaMeta } from 'ascii.rest/pieces/java';
+import rust, { meta as rustMeta } from 'ascii.rest/pieces/rust';
+import lua, { meta as luaMeta } from 'ascii.rest/pieces/lua';
+import c, { meta as cMeta } from 'ascii.rest/pieces/c';
+import python, { meta as pythonMeta } from 'ascii.rest/pieces/python';
+import cisco, { meta as ciscoMeta } from '@/lib/ascii/logos/cisco';
+import fortinet, { meta as fortinetMeta } from '@/lib/ascii/logos/fortinet';
+import paloAlto, { meta as paloAltoMeta } from '@/lib/ascii/logos/palo-alto';
+import snort, { meta as snortMeta } from '@/lib/ascii/logos/snort';
+import debian, { meta as debianMeta } from 'ascii.rest/pieces/debian';
+import fedora, { meta as fedoraMeta } from 'ascii.rest/pieces/fedora';
+import kaliLinux, { meta as kaliLinuxMeta } from 'ascii.rest/pieces/kali-linux';
+import redHat, { meta as redHatMeta } from 'ascii.rest/pieces/red-hat';
+import tux, { meta as tuxMeta } from 'ascii.rest/pieces/tux';
+
+const frontendLogos = [
+ { name: 'typescript', frame: typescript, meta: typescriptMeta },
+ { name: 'php', frame: php, meta: phpMeta },
+ { name: 'javascript', frame: javascript, meta: javascriptMeta },
+ { name: 'html', frame: html, meta: htmlMeta },
+ { name: 'css', frame: css, meta: cssMeta },
+];
+const backendLogos = [
+ { name: 'java', frame: java, meta: javaMeta },
+ { name: 'rust', frame: rust, meta: rustMeta },
+ { name: 'lua', frame: lua, meta: luaMeta },
+ { name: 'c', frame: c, meta: cMeta },
+ { name: 'python', frame: python, meta: pythonMeta },
+];
+const networkLogos = [
+ { name: 'cisco', frame: cisco, meta: ciscoMeta },
+ { name: 'fortinet', frame: fortinet, meta: fortinetMeta },
+ { name: 'palo-alto', frame: paloAlto, meta: paloAltoMeta },
+ { name: 'snort', frame: snort, meta: snortMeta },
+];
+const systemsLogos = [
+ { name: 'debian', frame: debian, meta: debianMeta },
+ { name: 'fedora', frame: fedora, meta: fedoraMeta },
+ { name: 'kali-linux', frame: kaliLinux, meta: kaliLinuxMeta },
+ { name: 'red-hat', frame: redHat, meta: redHatMeta },
+ { name: 'tux', frame: tux, meta: tuxMeta },
+];
 
 // Cada figura vive en src/components/figures/<id>/Figure.astro y se detecta sola.
 // Mientras no exista, se muestra un hueco; .figure-slot fija la proporción para ambos casos.
@@ -23,15 +70,18 @@ for (const id of Object.keys(figures)) {
  <ol class="areas">
   {site.stack.map((area) => {
    const Figure = figures[area.id];
+   const logos = area.id === 'frontend' ? frontendLogos : area.id === 'backend' ? backendLogos : area.id === 'redes' ? networkLogos : area.id === 'sistemas' ? systemsLogos : [];
+   const asciiPiece = area.id === 'frontend' ? 'earthrise' : area.id === 'redes' ? 'edge-orbit' : area.id === 'backend' ? 'green-storm' : area.id === 'sistemas' ? 'salt-flat' : null;
    return <li class="area" id={`stack-${area.id}`}>
     <div class="preview">
+     {logos.map(logo => <div class="preview-logo" data-preview-logo={logo.name} aria-hidden="true" style={`aspect-ratio:${logo.meta.cols}/${logo.meta.rows * 2};--logo-font:${100 / (logo.meta.cols * 0.6)}cqw`}><pre>{logo.frame()(0)}</pre></div>)}
      <div class="figure-slot" data-figure-home={area.id}>
       {Figure ? <Figure /> : <div class="placeholder">{area.title}<small>Diagrama próximamente</small></div>}
      </div>
      <button type="button" class="open-area" data-open-area={area.id} aria-haspopup="dialog" aria-controls={`dialog-${area.id}`} aria-label={`Explorar ${area.title}`}><span>{area.title}</span></button>
     </div>
-    <dialog id={`dialog-${area.id}`} class:list={["stack-dialog", { "ascii-scene": area.id === "frontend" || area.id === "redes" }]} aria-labelledby={`title-${area.id}`}>
-     {(area.id === 'frontend' || area.id === 'redes') && <div class="ascii-background" data-ascii-background data-piece={area.id === 'frontend' ? 'earthrise' : 'edge-orbit'} data-earthrise={area.id === 'frontend' ? '' : undefined} aria-hidden="true"></div>}
+    <dialog id={`dialog-${area.id}`} class:list={["stack-dialog", { "ascii-scene": Boolean(asciiPiece) }]} aria-labelledby={`title-${area.id}`}>
+     {asciiPiece && <div class="ascii-background" data-ascii-background data-piece={asciiPiece} data-earthrise={area.id === 'frontend' ? '' : undefined} aria-hidden="true"></div>}
      <form method="dialog"><button class="close-area" aria-label={`Cerrar ${area.title}`}>Cerrar</button></form>
      <div class="detail-layout">
       <div class="diagram-view">
@@ -51,6 +101,43 @@ for (const id of Object.keys(figures)) {
  </ol>
 </section>
 <script>
+ const logoPieces = {
+  typescript: () => import('ascii.rest/pieces/typescript'),
+  php: () => import('ascii.rest/pieces/php'),
+  javascript: () => import('ascii.rest/pieces/javascript'),
+  html: () => import('ascii.rest/pieces/html'),
+  css: () => import('ascii.rest/pieces/css'),
+  java: () => import('ascii.rest/pieces/java'),
+  rust: () => import('ascii.rest/pieces/rust'),
+  lua: () => import('ascii.rest/pieces/lua'),
+  c: () => import('ascii.rest/pieces/c'),
+  python: () => import('ascii.rest/pieces/python'),
+  cisco: () => import('@/lib/ascii/logos/cisco'),
+  fortinet: () => import('@/lib/ascii/logos/fortinet'),
+  'palo-alto': () => import('@/lib/ascii/logos/palo-alto'),
+  snort: () => import('@/lib/ascii/logos/snort'),
+  debian: () => import('ascii.rest/pieces/debian'),
+  fedora: () => import('ascii.rest/pieces/fedora'),
+  'kali-linux': () => import('ascii.rest/pieces/kali-linux'),
+  'red-hat': () => import('ascii.rest/pieces/red-hat'),
+  tux: () => import('ascii.rest/pieces/tux'),
+ };
+ for (const logo of document.querySelectorAll<HTMLElement>('[data-preview-logo]')) {
+  const name = logo.dataset.previewLogo;
+  if (!name || !(name in logoPieces)) continue;
+  const load = logoPieces[name as keyof typeof logoPieces];
+  const observer = new IntersectionObserver(async (entries) => {
+   if (!entries.some(entry => entry.isIntersecting)) return;
+   observer.disconnect();
+   try {
+    const [{ mount }, piece] = await Promise.all([import('ascii.rest'), load()]);
+    const canvas = document.createElement('canvas');
+    logo.replaceChildren(canvas);
+    mount(canvas, piece, { ...piece.meta.options, fps: 15 });
+   } catch { /* Conservar el primer fotograma si no se puede cargar la animación. */ }
+  });
+  observer.observe(logo);
+ }
  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-open-area]')) {
   const id = button.dataset.openArea!;
   const dialog = document.getElementById(`dialog-${id}`) as HTMLDialogElement;
@@ -73,7 +160,7 @@ for (const id of Object.keys(figures)) {
    if (background) {
     try {
      const [{ mount }, piece] = await Promise.all([import('ascii.rest'),
-      id === 'redes' ? import('@/lib/ascii/edge-orbit') : import('ascii.rest/pieces/earthrise')]);
+      id === 'redes' ? import('@/lib/ascii/edge-orbit') : id === 'backend' ? import('@/lib/ascii/green-storm') : id === 'sistemas' ? import('@/lib/ascii/salt-flat') : import('ascii.rest/pieces/earthrise')]);
      if (!dialog.open || request !== generation) return;
      const canvas = document.createElement('canvas');
      background.replaceChildren(canvas);
@@ -90,19 +177,48 @@ for (const id of Object.keys(figures)) {
  }
 </script>
 <style>
- .areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; list-style: none; margin: 0; padding: 0; }
+ #stack { max-width: 1440px; }
+ #stack > h2 { text-align: center; font-size: clamp(2.5rem, 5vw, 4rem); }
+ #stack > p { text-align: center; }
+ .areas { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2rem; list-style: none; margin: 0; padding: 0; }
+ .area { grid-column: span 2; }
+ .area:nth-child(4):nth-last-child(2) { grid-column: 2 / span 2; }
  .area { min-width: 0; }
- .preview { position: relative; padding-bottom: 2rem; }
+ .preview { position: relative; isolation: isolate; padding-top: 2.75rem; }
+ .preview-logo { position: absolute; z-index: -1; container-type: inline-size; opacity: 0.36; pointer-events: none; overflow: hidden; }
+ .preview-logo[data-preview-logo='typescript'] { top: 8%; right: 3%; width: 30%; transform: rotate(-12deg); color: #3178c6; }
+ .preview-logo[data-preview-logo='javascript'] { top: 13%; left: 4%; width: 23%; transform: rotate(10deg); color: #f5df50; }
+ .preview-logo[data-preview-logo='html'] { bottom: 12%; left: 1%; width: 18%; transform: rotate(-10deg); color: #e44d26; }
+ .preview-logo[data-preview-logo='css'] { bottom: 10%; right: 0; width: 18%; transform: rotate(12deg); color: #1572b6; }
+ .preview-logo[data-preview-logo='php'] { bottom: 0; left: 35%; width: 30%; transform: rotate(-6deg); color: #777bb3; }
+ .preview-logo[data-preview-logo='java'] { top: 9%; left: 2%; width: 23%; transform: rotate(-10deg); color: #ef2e2f; }
+ .preview-logo[data-preview-logo='rust'] { top: 6%; right: 0; width: 29%; transform: rotate(10deg); color: #f74c00; }
+ .preview-logo[data-preview-logo='lua'] { bottom: 9%; left: 0; width: 24%; transform: rotate(-12deg); color: #7777df; }
+ .preview-logo[data-preview-logo='c'] { bottom: 0; right: 12%; width: 24%; transform: rotate(8deg); color: #659ad3; }
+ .preview-logo[data-preview-logo='python'] { bottom: 1%; left: 30%; width: 23%; transform: rotate(-6deg); color: #417fb0; }
+ .preview-logo[data-preview-logo='cisco'] { top: 9%; left: 0; width: 29%; transform: rotate(-9deg); color: #176984; }
+ .preview-logo[data-preview-logo='palo-alto'] { top: 8%; right: 0; width: 25%; transform: rotate(10deg); color: #ff5529; }
+ .preview-logo[data-preview-logo='snort'] { bottom: 15%; left: 0; width: 25%; transform: rotate(-10deg); color: #f9a9ae; }
+ .preview-logo[data-preview-logo='fortinet'] { bottom: 1%; left: 24%; width: 56%; transform: rotate(4deg); color: #d33626; }
+ .preview-logo[data-preview-logo='debian'] { top: 10%; left: 1%; width: 21%; transform: rotate(-9deg); color: #c20037; }
+ .preview-logo[data-preview-logo='fedora'] { bottom: 0; left: 37%; width: 23%; transform: rotate(9deg); color: #3b5da3; }
+ .preview-logo[data-preview-logo='kali-linux'] { top: 8%; right: 1%; width: 37%; transform: rotate(-5deg); color: #287aff; }
+ .preview-logo[data-preview-logo='red-hat'] { bottom: 6%; right: 2%; width: 23%; transform: rotate(8deg); color: #e93442; }
+ .preview-logo[data-preview-logo='tux'] { bottom: 2%; left: 4%; width: 20%; transform: rotate(-8deg); color: #fdcc1b; }
+ .preview-logo pre { margin: 0; font: var(--logo-font)/1.2 monospace; white-space: pre; }
+ .preview-logo :global(canvas) { display: block; width: 100%; height: auto; color: var(--fg); }
+ .preview :global(.iso-plate-corners), .preview :global(figcaption) { display: none; }
+ .preview :global(.fe-plate), .preview :global(.rd-plate) { padding: 0; }
  .open-area { position: absolute; inset: 0; width: 100%; border: 0; border-radius: 0.75rem; background: transparent; color: var(--fg); cursor: pointer; font: inherit; }
- .open-area span { position: absolute; bottom: 0; left: 0; font-weight: 600; }
+ .open-area span { position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-weight: 600; }
  .open-area:hover, .open-area:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
  .figure-slot { min-width: 0; aspect-ratio: 4 / 3; }
  .figure-original { width: 100%; height: 100%; }
  .ascii-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; display: grid; align-items: center; }
  .ascii-background :global(canvas) { display: block; width: 100%; height: auto; min-height: 100%; object-fit: cover; opacity: 0.8; }
  .ascii-scene { isolation: isolate; --bg: #030408; --fg: #f4f4f5; --muted: #d4d4d8; --border: #45454c; --surface: #151720; --accent: #93c5fd; color-scheme: dark; }
- .ascii-scene .diagram-view { border-radius: 0.75rem; background: #030408c9; }
- .ascii-scene :global(.iso-plate-corner), .ascii-scene :global(.fe-keys), .ascii-scene :global(.rd-keys) { color: #d4d4d8; text-shadow: 0 1px 3px #030408; }
+ .ascii-scene .diagram-view { border-radius: 0; background: transparent; }
+ .ascii-scene :global(.iso-plate-corner), .ascii-scene :global(.fe-keys), .ascii-scene :global(.rd-keys), .ascii-scene :global(.be-caption), .ascii-scene :global(.be-keys), .ascii-scene :global(.sy-caption) { color: #d4d4d8; text-shadow: 0 1px 3px #030408; }
  .ascii-scene .text { border-radius: 0.75rem; padding: 1rem; background: #030408e8; }
  .diagram-view { min-width: 0; width: 100%; max-width: calc((94dvh - 10rem) * 4 / 3); margin-inline: auto; }
  .diagram-view small { color: var(--muted); }
@@ -121,5 +237,5 @@ for (const id of Object.keys(figures)) {
  .tech-button:hover, .tech-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
  .placeholder { display: grid; align-content: center; justify-items: center; height: 100%; background: var(--surface); color: var(--muted); border-radius: 0.75rem; }
  .placeholder small { display: block; }
- @media(max-width: 700px) { .areas, .detail-layout { grid-template-columns: 1fr; } .detail-layout { gap: 1.5rem; min-height: 0; padding-top: 1rem; } .diagram-view { max-width: none; } }
+ @media(max-width: 700px) { .areas, .detail-layout { grid-template-columns: 1fr; } .area, .area:nth-child(4):nth-last-child(2) { grid-column: auto; } .detail-layout { gap: 1.5rem; min-height: 0; padding-top: 1rem; } .diagram-view { max-width: none; } }
 </style>

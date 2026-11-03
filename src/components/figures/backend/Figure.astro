@@ -1,0 +1,73 @@
+---
+import '@/lib/iso/iso.css';
+import '@/lib/iso/theme.css';
+import { figureSvg } from '@/lib/iso/iso-kit';
+import { build, W, H } from './geometry';
+
+const { body, routes } = build();
+const svg = figureSvg({ width: W, height: H, label: 'Banco isométrico de tres servidores Rust, Java/Quarkus y PHP/Laravel, un módulo de autenticación Supabase y dos depósitos cilíndricos de discos MySQL y PostgreSQL. Una petición simulada recorre las pistas de la base.', body });
+---
+
+<figure class="be-fig iso" data-figure="backend" data-operation="read" data-routes={JSON.stringify(routes)}>
+ <div class="be-plate">
+  <div class="be-stage" style={`--ar:${W / H}`}>
+   <Fragment set:html={svg} />
+   <button class="be-hit" type="button" aria-label="Simulación: cambiar de lectura a escritura" aria-pressed="false"></button>
+  </div>
+ </div>
+ <figcaption class="be-caption">
+  <div class="be-status"><span>Clic: lectura ↔ escritura</span><span data-backend-readout>Simulación · lectura · Supabase · autenticación JWT</span></div>
+  <div class="be-keys"><span>Rust · REST</span><span>Java · Quarkus</span><span>PHP · Laravel</span><span>MySQL</span><span>PostgreSQL</span><span>Supabase · Auth</span></div>
+ </figcaption>
+</figure>
+
+<script>
+ for (const root of document.querySelectorAll<HTMLElement>('[data-figure="backend"]')) {
+  const observer = new IntersectionObserver(entries => {
+   if (!entries.some(entry => entry.isIntersecting)) return;
+   observer.disconnect();
+   import('./live').then(({ mount }) => mount(root)).catch(error => console.error('[figura backend]', error));
+  });
+  observer.observe(root);
+ }
+</script>
+
+<style is:global>
+ .be-fig { display: flex; flex-direction: column; gap: 0.5rem; height: 100%; margin: 0; --be-flow: #8ecbaf; --be-screen: #a9d9bd; --be-hole: #080b0b; }
+ :root[data-theme='light'] .be-fig { --be-flow: #247757; --be-screen: #22654a; --be-hole: #a7b3b0; }
+ @media(prefers-color-scheme: light) { :root:not([data-theme]) .be-fig { --be-flow: #247757; --be-screen: #22654a; --be-hole: #a7b3b0; } }
+ .be-plate { position: relative; flex: 1; min-height: 0; container-type: size; }
+ .be-stage { position: relative; width: min(100cqw, 100cqh * var(--ar)); aspect-ratio: var(--ar); margin: auto; }
+ .be-stage > .iso-svg { display: block; width: 100%; height: 100%; }
+ .be-hit { position: absolute; inset: 0; border: 0; background: transparent; cursor: pointer; padding: 0; }
+ .be-hit:focus-visible { outline: 2px solid var(--be-flow); outline-offset: 3px; border-radius: 0.5rem; }
+ .be-tint[data-brand='mysql'] { --be-brand: #3998ac; }
+ .be-tint[data-brand='postgres'] { --be-brand: #5487af; }
+ .be-tint[data-brand='rust'] { --be-brand: #e58558; }
+ .be-tint[data-brand='java'] { --be-brand: #e7a656; }
+ .be-tint[data-brand='php'] { --be-brand: #9396d0; }
+ .be-tint[data-brand='supabase'] { --be-brand: #3ecf8e; }
+ .be-brand-ink { fill: var(--be-brand, var(--be-flow)); }
+ .be-brand-hole { fill: var(--anatomy-paper); }
+ .be-brand-stroke { fill: none; stroke: var(--be-brand, var(--anatomy-mid)); stroke-width: 1; stroke-linecap: round; }
+ .be-inspection { fill: var(--be-hole); stroke: var(--anatomy-mid); stroke-width: 0.6; }
+ .be-circuit-board { fill: color-mix(in srgb, var(--anatomy-shade-0), var(--be-brand) 14%); stroke: var(--anatomy-lo); stroke-width: 0.4; }
+ .be-chip { fill: var(--anatomy-paper); stroke: var(--be-brand); stroke-width: 0.8; }
+ .be-circuit { fill: none; stroke: var(--be-brand); stroke-width: 0.5; opacity: 0.75; }
+ .be-memory { fill: var(--anatomy-paper); stroke: var(--anatomy-mid); stroke-width: 0.5; }
+ .be-panel-screw { fill: var(--anatomy-mid); }
+ .be-tint .iso-top { fill: color-mix(in srgb, var(--anatomy-top), var(--be-brand) 14%); }
+ .be-tint .iso-shade[data-shade='1'] { fill: color-mix(in srgb, var(--anatomy-shade-1), var(--be-brand) 12%); }
+ .be-tint .iso-shade[data-shade='2'] { fill: color-mix(in srgb, var(--anatomy-shade-2), var(--be-brand) 12%); }
+ .be-window, .be-vent { fill: var(--be-hole); stroke: var(--anatomy-lo); stroke-width: 0.35; }
+ .be-screen-rule { fill: none; stroke: var(--be-screen); stroke-width: 0.65; }
+ .be-fan-rim, .be-drive-rule, .be-power { fill: none; stroke: var(--anatomy-mid); stroke-width: 0.65; }
+ .be-fan-hub, .be-fan-blade { fill: var(--anatomy-lo); stroke: var(--anatomy-mid); stroke-width: 0.4; }
+ .be-led { fill: var(--be-flow); opacity: 0.6; }
+ .be-track-seat { fill: none; stroke: var(--anatomy-paper); stroke-width: 4.6; stroke-linejoin: round; stroke-linecap: round; }
+ .be-track { fill: none; stroke: var(--anatomy-mid); stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; }
+ .be-packet { fill: var(--be-flow); stroke: var(--anatomy-paper); stroke-width: 0.7; }
+ .be-caption { display: grid; gap: 0.65rem; color: var(--anatomy-text); font: 10.5px/1.4 var(--anatomy-mono); }
+ .be-status { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+ .be-keys { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem 1rem; color: var(--anatomy-muted); }
+</style>

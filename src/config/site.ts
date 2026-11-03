@@ -13,7 +13,7 @@ export interface Project {
 	repo?: string;
 }
 
-export type StackId = 'frontend' | 'backend' | 'redes' | 'ciberseguridad' | 'cloud';
+export type StackId = 'frontend' | 'backend' | 'redes' | 'sistemas' | 'cloud';
 
 export interface StackArea {
 	id: StackId;
@@ -79,24 +79,24 @@ export const site: Site = {
 		{
 			id: 'backend',
 			title: 'Backend',
-			summary: 'APIs y servicios fiables, con colas y datos bien modelados.',
-			concept: 'Ciclo de una petición: una clasificadora de correo que recibe, enruta, procesa en cola y despacha respuestas.',
-			techs: ['Node.js', 'SQL', 'REST'],
+			summary: 'Servicios con Rust, Java/Quarkus y PHP/Laravel; datos con MySQL y PostgreSQL, y autenticación con Supabase.',
+			concept: 'Ciclo de una petición: un banco de servidores compactos conectado por pistas a depósitos cilíndricos de discos; una petición simulada recorre los servicios y vuelve tras leer o escribir datos.',
+			techs: ['Rust', 'REST', 'Java', 'Quarkus', 'PHP', 'Laravel', 'MySQL', 'PostgreSQL', 'Supabase'],
 		},
 		{
 			id: 'redes',
-			title: 'Redes',
-			summary: 'Cómo viajan los datos: enrutamiento, VLANs, filtrado y la configuración de equipos Cisco.',
+			title: 'Redes y seguridad',
+			summary: 'Conectividad y defensa de la red: Cisco, VLANs, ACL, firewalls Fortinet y Palo Alto, e inspección con Snort.',
 			concept:
-				'Enrutamiento y filtrado: un rack de 19" donde los paquetes entran por el patch panel, el firewall los inspecciona con su ACL y el router Cisco elige el siguiente salto por el prefijo más largo.',
-			techs: ['Cisco IOS', 'Packet Tracer', 'Enrutamiento', 'VLAN / VLSM', 'ACL / NAT', 'SSH', 'Rust'],
+				'Enrutamiento y seguridad: un rack con equipos Cisco, firewall ACL y un FortiGate adicional. La simulación muestra el filtrado ACL y la selección del siguiente salto por el prefijo más largo.',
+			techs: ['Cisco IOS', 'Packet Tracer', 'Fortinet', 'Palo Alto Networks', 'Snort', 'Enrutamiento', 'VLAN / VLSM', 'ACL / NAT', 'SSH', 'TLS', 'IAM', 'OWASP', 'Rust'],
 		},
 		{
-			id: 'ciberseguridad',
-			title: 'Ciberseguridad',
-			summary: 'Seguridad por capas desde el diseño, no como parche final.',
-			concept: 'Defensa en profundidad: una bóveda con compuertas (firewall, autenticación, cifrado) que cada petición debe superar.',
-			techs: ['OWASP', 'TLS', 'IAM'],
+			id: 'sistemas',
+			title: 'Sistemas y servidores',
+			summary: 'Administración de Linux y servidores: servicios, usuarios, permisos, monitoreo y respaldos.',
+			concept: 'Una fábrica isométrica de peluches: entran piezas por arriba, bajan a una cámara con fuego, pasan por una prensa de confección y salen a una cinta como Tux de Linux, macOS y después solo Linux.',
+			techs: ['Linux', 'Bash', 'systemd', 'SSH', 'Usuarios y permisos', 'Monitoreo', 'Respaldos'],
 		},
 		{
 			id: 'cloud',

@@ -419,9 +419,27 @@ function firewall(): Device {
 	return { u: 7, h: 1, depth: 88, color: 'fw', face: out.join('') };
 }
 
-function blank(): Device {
+/** FortiGate adicional: equipo ilustrativo, no modifica el modelo de ACL del firewall de U7. */
+function fortigate(): Device {
 	const zb = uz(6);
-	return { u: 6, h: 1, depth: 3, face: vents(-82, 82, zb + 3.2, zb + RU - 3.2, 4, 4, 2.4) };
+	const out: string[] = [];
+	// Emblema de Fortinet: tres columnas y tres filas, con la franja central abierta.
+	for (let row = 0; row < 3; row++) for (let col = 0; col < 3; col++) {
+		if (row === 1 && col === 1) continue;
+		out.push(lrect(-86 + col * 3.4, zb + 5 + row * 2.6, -83.4 + col * 3.4, zb + 7 + row * 2.6, 'rd-fortinet-mark', 0.15));
+	}
+	out.push(ltext(-73.5, zb + 9, 3.3, 'FORTINET', 'start', 'hi'), ltext(-86, zb + 2.4, 2.1, 'FortiGate', 'start', 'lo'));
+	out.push(led(-50, zb + 11.6, 'green'), ltext(-50, zb + 7.2, 1.6, 'PWR', 'middle', 'lo'));
+	out.push(led(-43, zb + 11.6, 'green'), ltext(-43, zb + 7.2, 1.6, 'STA', 'middle', 'lo'));
+	const portZ = zb + 8.5;
+	for (let i = 0; i < 8; i++) {
+		const x = -25 + i * 9;
+		out.push(jack(x, portZ, 4.6, 4.2), ledOff(x, portZ + 3.5, 'green', 0.5));
+		out.push(ltext(x, zb + 2.5, 1.6, i === 0 ? 'WAN' : i === 1 ? 'DMZ' : String(i - 1), 'middle', 'lo'));
+	}
+	out.push(lrect(55, zb + 6, 61, zb + 8, 'rd-port', 0.3), ltext(58, zb + 2.5, 1.6, 'USB', 'middle', 'lo'));
+	out.push(vents(67, 86, zb + 3, zb + RU - 3, 3));
+	return { u: 6, h: 1, depth: 76, color: 'fortinet', face: `<g data-device="fortigate">${out.join('')}</g>` };
 }
 
 function server(): Device {
@@ -691,7 +709,7 @@ export interface Built {
 }
 
 export function build(): Built {
-	const devices = [ups(), pdu(), server(), blank(), firewall(), isr(), catalyst(), manager(), patchPanel()];
+	const devices = [ups(), pdu(), server(), fortigate(), firewall(), isr(), catalyst(), manager(), patchPanel()];
 	const left = duct(-1);
 	const right = duct(1);
 	const ring = rings();
@@ -763,7 +781,8 @@ export function build(): Built {
 			'Rack de red de 19 pulgadas y 11 unidades. Un cable del proveedor sube desde la ONT a la bandeja y baja al patch panel; ' +
 			'de ahí un cordón lleva cada paquete al firewall, que aplica la ACL OUTSIDE_IN y bloquea en rojo lo que no está permitido, como telnet o SMB desde Internet. ' +
 			'Lo permitido pasa al router Cisco, que elige el siguiente salto por el prefijo más largo: el servidor por Gi0/2, la LAN por el troncal al switch Cisco, ' +
-			'que lo saca por el puerto de su VLAN de vuelta al patch panel, o Null0 si no hay una red concreta. Debajo, el servidor con las herramientas en Rust, la PDU y el SAI.',
+			'que lo saca por el puerto de su VLAN de vuelta al patch panel, o Null0 si no hay una red concreta. Un FortiGate adicional ocupa la unidad 6; ' +
+			'sus puertos están sin conectar y no interviene en esta simulación. Debajo, el servidor con las herramientas en Rust, la PDU y el SAI.',
 		data,
 	};
 }

@@ -103,12 +103,13 @@ test('unsafe links and failed writes do not leave an uploaded file', async ({ pa
 });
 test('stack opens a diagram, exposes technologies and restores focus', async ({ page }) => {
  await page.goto('/');
- const open = page.getByRole('button', { name: 'Explorar Redes', exact: true });
+ const open = page.getByRole('button', { name: 'Explorar Redes y seguridad', exact: true });
  await open.click();
  const dialog = page.locator('#dialog-redes');
  await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('button', { name: 'Cisco IOS', exact: true })).toBeVisible();
  const stage = dialog.locator('.rd-stage');
+ await dialog.evaluate(element => Promise.all(element.getAnimations({ subtree: true }).filter(animation => animation.effect?.getComputedTiming().iterations !== Infinity).map(animation => animation.finished)));
  const bounds = await stage.boundingBox();
  await dialog.getByRole('button', { name: 'Cisco IOS', exact: true }).click();
  await expect(dialog.locator('[data-figure="redes"]')).toHaveAttribute('data-detail', 'open');
@@ -119,7 +120,7 @@ test('stack opens a diagram, exposes technologies and restores focus', async ({ 
  await expect(dialog.locator('[data-figure="redes"]')).not.toHaveAttribute('data-detail', 'open');
  await dialog.getByRole('button', { name: 'Packet Tracer', exact: true }).click();
  await expect(dialog.locator('[data-figure="redes"]')).toHaveAttribute('data-detail', 'open');
- await expect(dialog.getByRole('heading', { name: 'Redes', exact: true })).toBeVisible();
+ await expect(dialog.getByRole('heading', { name: 'Redes y seguridad', exact: true })).toBeVisible();
  expect(await stage.boundingBox()).toEqual(bounds);
  await expect(page.locator('dialog:modal')).toHaveCount(1);
  await page.screenshot({ path: '/private/tmp/portfolio-packet-inline.png' });
@@ -146,8 +147,8 @@ test('enlarged dialogs stay inside the viewport after scrolling to Redes', async
  for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
   await page.setViewportSize(viewport);
   await page.goto('/');
-  const open = page.getByRole('button', { name: 'Explorar Redes', exact: true });
-  await open.scrollIntoViewIfNeeded();
+  const open = page.getByRole('button', { name: 'Explorar Redes y seguridad', exact: true });
+  await open.evaluate(element => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
   const scrollBefore = await page.evaluate(() => scrollY);
   expect(scrollBefore).toBeGreaterThan(0);
   await open.click();
@@ -162,7 +163,7 @@ test('enlarged dialogs stay inside the viewport after scrolling to Redes', async
   await dialog.hover();
   await page.mouse.wheel(0, 500);
   expect(await page.evaluate(() => scrollY)).toBe(scrollBefore);
-  await expect(dialog.getByRole('button', { name: 'Cerrar Redes', exact: true })).toBeInViewport();
+  await expect(dialog.getByRole('button', { name: 'Cerrar Redes y seguridad', exact: true })).toBeInViewport();
   await page.screenshot({ path: `/private/tmp/portfolio-redes-${viewport.width}.png` });
   await page.keyboard.press('Escape');
   await expect(open).toBeFocused();
@@ -177,7 +178,7 @@ test('Redes loads edge-orbit only on open and preserves packet interaction', asy
  await page.goto('/');
  const background = page.locator('#dialog-redes [data-ascii-background]');
  await expect(background.locator('canvas')).toHaveCount(0);
- await page.getByRole('button', { name: 'Explorar Redes', exact: true }).click();
+ await page.getByRole('button', { name: 'Explorar Redes y seguridad', exact: true }).click();
  await expect(background).toHaveAttribute('data-piece', 'edge-orbit');
  await expect(background.locator('canvas')).toBeVisible();
  await page.getByRole('button', { name: 'Packet Tracer', exact: true }).click();
@@ -185,4 +186,156 @@ test('Redes loads edge-orbit only on open and preserves packet interaction', asy
  await page.screenshot({ path: '/private/tmp/portfolio-edge-orbit.png' });
  await page.keyboard.press('Escape');
  await expect(background.locator('canvas')).toHaveCount(0);
+});
+
+test('Backend shows its servers and databases, switches operations and respects reduced motion', async ({ page }) => {
+ await page.emulateMedia({ reducedMotion: 'reduce' });
+ await page.goto('/stack/');
+ const preview = page.locator('[data-figure-home="backend"]');
+ const background = page.locator('#dialog-backend [data-ascii-background]');
+ await expect(page.locator('#stack-backend [data-preview-logo]')).toHaveCount(5);
+ await expect(background.locator('canvas')).toHaveCount(0);
+ await expect(preview.locator('[data-figure="backend"]')).toBeVisible();
+ await expect(preview.locator('figcaption')).toBeHidden();
+ await page.getByRole('button', { name: 'Explorar Backend', exact: true }).click();
+ const dialog = page.locator('#dialog-backend');
+ await expect(background).toHaveAttribute('data-piece', 'green-storm');
+ await expect(background.locator('canvas')).toBeVisible();
+ const figure = dialog.locator('[data-figure="backend"]');
+ await expect(figure).toHaveAttribute('data-ready', 'true');
+ await expect(figure.locator('svg[role="img"]')).toHaveAttribute('aria-label', /MySQL y PostgreSQL/);
+ await expect(figure.locator('svg[role="img"]')).toHaveAttribute('aria-label', /Rust.*Supabase/);
+ await expect(figure.getByText('Node.js', { exact: true })).toHaveCount(0);
+ await expect(figure.locator('[data-part="auth.chassis"]')).toHaveCount(1);
+ await expect(figure.locator('[data-part^="server-"][data-part$=".chassis"]')).toHaveCount(3);
+ await expect(figure.locator('[data-part^="store-"][data-part$=".lid"]')).toHaveCount(2);
+ const toggle = figure.getByRole('button');
+ await expect(toggle).toHaveAccessibleName('Simulación: cambiar de lectura a escritura');
+ await toggle.focus();
+ await page.keyboard.press('Enter');
+ await expect(figure).toHaveAttribute('data-operation', 'write');
+ await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+ await expect(figure.locator('[data-backend-readout]')).toContainText('Simulación · escritura');
+ const packet = figure.locator('[data-packet="request"]');
+ const position = await packet.getAttribute('cx');
+ await page.waitForTimeout(200);
+ await expect(packet).toHaveAttribute('cx', position!);
+ await toggle.click();
+ await expect(figure).toHaveAttribute('data-operation', 'read');
+ await page.keyboard.press('Escape');
+ await page.setViewportSize({ width: 390, height: 844 });
+ await page.getByRole('button', { name: 'Explorar Backend', exact: true }).click();
+ await expect(dialog).toBeVisible();
+ expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+ await page.keyboard.press('Escape');
+ await expect(preview.locator('[data-figure="backend"]')).toBeVisible();
+ await expect(background.locator('canvas')).toHaveCount(0);
+});
+
+test('network security logos render in both themes and the rack includes FortiGate', async ({ page }) => {
+ await page.emulateMedia({ reducedMotion: 'reduce' });
+ for (const theme of ['light', 'dark']) {
+  for (const width of [1280, 390]) {
+   await page.setViewportSize({ width, height: 900 });
+   await page.goto('/stack/');
+   await page.evaluate(value => { localStorage.setItem('theme', value); document.documentElement.dataset.theme = value; }, theme);
+   const card = page.locator('#stack-redes');
+   await expect(card.locator('[data-preview-logo]')).toHaveCount(4);
+   for (const name of ['cisco', 'fortinet', 'palo-alto', 'snort']) {
+    const logo = card.locator(`[data-preview-logo="${name}"]`);
+    await logo.scrollIntoViewIfNeeded();
+    await expect(logo.locator('canvas')).toBeVisible();
+    expect(await logo.locator('canvas').evaluate(canvas => canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0)).toBe(true);
+   }
+   await page.getByRole('button', { name: 'Explorar Redes y seguridad', exact: true }).click();
+   const dialog = page.locator('#dialog-redes');
+   await expect(dialog.locator('.rd-stage [data-device="fortigate"]')).toHaveCount(1);
+   await expect(dialog.locator('.rd-stage').getByText('FortiGate', { exact: true })).toBeVisible();
+   await page.keyboard.press('Escape');
+   await expect(page.getByRole('button', { name: 'Explorar Sistemas y servidores', exact: true })).toBeVisible();
+   await expect(page.getByRole('button', { name: 'Explorar Ciberseguridad', exact: true })).toHaveCount(0);
+   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+ }
+});
+
+test('Systems factory produces Linux, macOS and then only Linux, with pause and reduced-motion controls', async ({ page }) => {
+ await page.emulateMedia({ reducedMotion: 'reduce' });
+ await page.goto('/stack/');
+ const preview = page.locator('[data-figure-home="sistemas"]');
+ const background = page.locator('#dialog-sistemas [data-ascii-background]');
+ await expect(background.locator('canvas')).toHaveCount(0);
+ const card = page.locator('#stack-sistemas');
+ await expect(card.locator('[data-preview-logo]')).toHaveCount(5);
+ for (const name of ['debian', 'fedora', 'kali-linux', 'red-hat', 'tux']) {
+  const logo = card.locator(`[data-preview-logo="${name}"]`);
+  await logo.scrollIntoViewIfNeeded();
+  await expect(logo.locator('canvas')).toBeVisible();
+ }
+ await expect(preview.locator('[data-figure="sistemas"]')).toBeVisible();
+ await expect(preview.locator('figcaption')).toBeHidden();
+ await page.getByRole('button', { name: 'Explorar Sistemas y servidores', exact: true }).click();
+ const dialog = page.locator('#dialog-sistemas');
+ await expect(background).toHaveAttribute('data-piece', 'salt-flat');
+ await expect(background.locator('canvas')).toBeVisible();
+ const figure = dialog.locator('[data-figure="sistemas"]');
+ await expect(figure).toHaveAttribute('data-ready', 'true');
+ await expect(figure.locator('svg[role="img"]')).toHaveAttribute('aria-label', /piezas.*calor.*prensa/);
+ await expect(figure.locator('[data-sy-claw]')).toHaveCount(0);
+ await expect(figure.locator('[data-sy-materials] [data-part]')).toHaveCount(3);
+ const control = figure.locator('.sy-hit');
+ await expect(control).toHaveAccessibleName('Sacar el siguiente peluche');
+ for (const [i, mascot] of ['linux', 'macos', 'linux', 'linux'].entries()) {
+  await control.focus(); await page.keyboard.press('Enter');
+  await expect(figure).toHaveAttribute('data-delivered', String(i + 1));
+  await expect(figure).toHaveAttribute('data-last-mascot', mascot);
+ }
+ expect(await figure.locator('[data-sy-output]').evaluateAll(slots => slots.filter(slot => slot instanceof SVGElement && slot.style.display !== 'none').every(slot => slot.getAttribute('data-kind') === 'linux'))).toBe(true);
+ await figure.getByRole('button', { name: 'Reiniciar secuencia', exact: true }).click();
+ await expect(figure).toHaveAttribute('data-delivered', '0');
+ await page.emulateMedia({ reducedMotion: 'no-preference' });
+ await expect(figure).toHaveAttribute('data-playing', 'true');
+ await expect.poll(async () => Number(await figure.locator('[data-sy-heat]').getAttribute('opacity'))).toBeGreaterThan(0);
+ await control.click();
+ await expect(figure).toHaveAttribute('data-playing', 'false');
+ const materials = figure.locator('[data-sy-materials]');
+ const position = await materials.getAttribute('transform');
+ await page.waitForTimeout(200);
+ await expect(materials).toHaveAttribute('transform', position!);
+ await page.setViewportSize({ width: 390, height: 844 });
+ expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+ await control.click();
+ await expect(figure).toHaveAttribute('data-playing', 'true');
+ await page.keyboard.press('Escape');
+ await expect(background.locator('canvas')).toHaveCount(0);
+ await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+ await expect(preview.locator('[data-figure="sistemas"]')).toHaveAttribute('data-playing', 'false');
+});
+
+test('home presents the name over wired intelligence on desktop, mobile and without JavaScript', async ({ page, browser }) => {
+ await page.emulateMedia({ reducedMotion: 'reduce' });
+ for (const width of [1920, 1280, 390]) {
+  await page.setViewportSize({ width, height: 900 });
+  await page.goto('/');
+  const hero = page.getByRole('region', { name: 'Luis Emilaino Garcia Sifuentes', exact: true });
+  await expect(hero.locator('[data-hero-ascii]')).toHaveAttribute('data-ready', 'true');
+  await expect(hero.locator('canvas')).toBeVisible();
+  await expect(hero.getByRole('heading', { level: 1 })).toHaveText('Luis Emilaino Garcia Sifuentes');
+  await expect(hero.getByRole('link', { name: 'Ver proyectos', exact: true })).toBeVisible();
+  const bounds = await hero.evaluate(element => {
+   const section = element.getBoundingClientRect();
+   const art = element.querySelector('canvas')!.getBoundingClientRect();
+   return { bottom: section.bottom, viewport: innerHeight, contained: art.left >= section.left - 1 && art.right <= section.right + 1 && art.top >= section.top - 1 && art.bottom <= section.bottom + 1 };
+  });
+  expect(Math.abs(bounds.bottom - bounds.viewport)).toBeLessThanOrEqual(1);
+  expect(bounds.contained).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+ }
+ const context = await browser.newContext({ javaScriptEnabled: false });
+ const staticPage = await context.newPage();
+ await staticPage.goto('http://127.0.0.1:4322/');
+ await expect(staticPage.locator('#hero-name')).toBeVisible();
+ await expect(staticPage.locator('[data-hero-ascii] pre')).toBeVisible();
+ expect((await staticPage.locator('[data-hero-ascii] pre').textContent())?.trim().length).toBeGreaterThan(1000);
+ await context.close();
 });

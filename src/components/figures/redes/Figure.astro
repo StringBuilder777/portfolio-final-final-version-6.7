@@ -14,16 +14,15 @@ const keys = [
 	{ brand: 'cisco', name: 'Cisco', role: 'switch y router IOS' },
 	{ brand: 'route', name: 'Enrutamiento', role: 'prefijo más largo' },
 	{ brand: 'fw', name: 'Firewall', role: 'ACL OUTSIDE_IN' },
+	{ brand: 'fortinet', name: 'Fortinet', role: 'FortiGate adicional' },
 	{ brand: 'v10', name: 'VLAN', role: '10 y 20' },
 	{ brand: 'rust', name: 'Rust', role: 'NetCli y BuilderNet' },
 ];
 ---
 
 <figure class="rd-fig iso" data-figure="redes" data-mode="acl" data-live={JSON.stringify(data)}>
-	<div class="iso-plate rd-plate">
+	<div class="rd-plate">
 		<div class="iso-plate-corners">
-			<span class="iso-plate-corner" data-corner="fig" aria-hidden="true">Fig 3</span>
-			<span class="iso-plate-corner" data-corner="title" aria-hidden="true">Rack de enrutamiento</span>
 			<span class="iso-plate-corner" data-corner="hint" aria-hidden="true">Clic: ACL ↔ sin ACL</span>
 			<span class="iso-plate-corner" data-corner="readout" data-readout>{readout}</span>
 		</div>
@@ -84,6 +83,7 @@ const keys = [
 		--rd-cisco: #3fb2e6;
 		--rd-route: #2f9fd4;
 		--rd-fw: #ef5b4f;
+		--rd-fortinet: #d33626;
 		--rd-rust: #e8714c;
 		--rd-v10: #4f94dc;
 		--rd-v20: #2bb3a3;
@@ -185,6 +185,7 @@ const keys = [
 	}
 
 	.rd-plate {
+		position: relative;
 		flex: 1;
 		min-height: 0;
 		padding: 22px 0 24px;
@@ -307,6 +308,7 @@ const keys = [
 	.rd-port {
 		fill: var(--rd-hole);
 	}
+	.rd-fortinet-mark { fill: var(--rd-fortinet); }
 	.rd-slot {
 		fill: var(--rd-slot);
 	}
@@ -432,6 +434,7 @@ const keys = [
 	.rd-key[data-brand='fw'] {
 		--k: var(--rd-fw);
 	}
+	.rd-key[data-brand='fortinet'] { --k: var(--rd-fortinet); }
 	.rd-key[data-brand='v10'] {
 		--k: linear-gradient(90deg, var(--rd-v10) 50%, var(--rd-v20) 50%);
 	}
