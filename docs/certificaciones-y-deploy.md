@@ -51,3 +51,7 @@ Resultado: `pnpm build`, 0 errores, 0 advertencias y 0 hints; `pnpm test`, 5 pru
 ## Fondo de Frontend
 
 Frontend conserva su diagrama SVG original. `earthrise` de `ascii.rest` se carga desde el paquete local al abrir la ventana, como fondo decorativo sobre canvas. La animación respeta movimiento reducido y su reproducción se destruye al cerrar. Se retiró el visor Three.js. Licencia MIT disponible en `public/licenses/ascii-rest.txt`. Vercel continúa como destino de publicación.
+
+## Fondo de Redes
+
+Redes usa `edge-orbit` de ascii.rest, copiado del repositorio oficial a `src/lib/ascii/edge-orbit.ts` porque el paquete instalado no contiene esa pieza. Comparte la carga bajo demanda y la limpieza al cerrar de Frontend. La extracción Cisco se realiza dentro del mismo SVG, sin cambiar la distribución ni abrir otra ventana. Para el estado actualizado y pendientes, consultar `estado-y-pendientes.md`.

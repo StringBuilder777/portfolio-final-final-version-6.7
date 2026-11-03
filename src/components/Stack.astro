@@ -30,8 +30,8 @@ for (const id of Object.keys(figures)) {
      </div>
      <button type="button" class="open-area" data-open-area={area.id} aria-haspopup="dialog" aria-controls={`dialog-${area.id}`} aria-label={`Explorar ${area.title}`}><span>{area.title}</span></button>
     </div>
-    <dialog id={`dialog-${area.id}`} class:list={["stack-dialog", { "frontend-scene": area.id === "frontend" }]} aria-labelledby={`title-${area.id}`}>
-     {area.id === 'frontend' && <div class="earthrise-background" data-earthrise aria-hidden="true"></div>}
+    <dialog id={`dialog-${area.id}`} class:list={["stack-dialog", { "ascii-scene": area.id === "frontend" || area.id === "redes" }]} aria-labelledby={`title-${area.id}`}>
+     {(area.id === 'frontend' || area.id === 'redes') && <div class="ascii-background" data-ascii-background data-piece={area.id === 'frontend' ? 'earthrise' : 'edge-orbit'} data-earthrise={area.id === 'frontend' ? '' : undefined} aria-hidden="true"></div>}
      <form method="dialog"><button class="close-area" aria-label={`Cerrar ${area.title}`}>Cerrar</button></form>
      <div class="detail-layout">
       <div class="diagram-view">
@@ -57,7 +57,7 @@ for (const id of Object.keys(figures)) {
   const home = document.querySelector<HTMLElement>(`[data-figure-home="${id}"]`)!;
   const target = dialog.querySelector<HTMLElement>('[data-figure-target]')!;
   const original = target.querySelector<HTMLElement>('.figure-original')!;
-  const background = dialog.querySelector<HTMLElement>('[data-earthrise]');
+  const background = dialog.querySelector<HTMLElement>('[data-ascii-background]');
   let stopBackground: (() => void) | null = null;
   let generation = 0;
   button.addEventListener('click', async () => {
@@ -72,11 +72,12 @@ for (const id of Object.keys(figures)) {
    }
    if (background) {
     try {
-     const [{ mount }, earthrise] = await Promise.all([import('ascii.rest'), import('ascii.rest/pieces/earthrise')]);
+     const [{ mount }, piece] = await Promise.all([import('ascii.rest'),
+      id === 'redes' ? import('@/lib/ascii/edge-orbit') : import('ascii.rest/pieces/earthrise')]);
      if (!dialog.open || request !== generation) return;
      const canvas = document.createElement('canvas');
      background.replaceChildren(canvas);
-     stopBackground = mount(canvas, earthrise, { fps: 15 });
+     stopBackground = mount(canvas, piece, { fps: 15 });
     } catch { /* El diagrama sigue disponible si no se puede cargar el fondo decorativo. */ }
    }
   });
@@ -97,12 +98,12 @@ for (const id of Object.keys(figures)) {
  .open-area:hover, .open-area:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
  .figure-slot { min-width: 0; aspect-ratio: 4 / 3; }
  .figure-original { width: 100%; height: 100%; }
- .earthrise-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; display: grid; align-items: center; }
- .earthrise-background :global(canvas) { display: block; width: 100%; height: auto; min-height: 100%; object-fit: cover; opacity: 0.8; }
- .frontend-scene { isolation: isolate; --bg: #030408; --fg: #f4f4f5; --muted: #d4d4d8; --border: #45454c; --surface: #151720; --accent: #93c5fd; color-scheme: dark; }
- .frontend-scene .diagram-view { border-radius: 0.75rem; background: #030408c9; }
- .frontend-scene :global(.iso-plate-corner), .frontend-scene :global(.fe-keys) { color: #d4d4d8; text-shadow: 0 1px 3px #030408; }
- .frontend-scene .text { border-radius: 0.75rem; padding: 1rem; background: #030408e8; }
+ .ascii-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; display: grid; align-items: center; }
+ .ascii-background :global(canvas) { display: block; width: 100%; height: auto; min-height: 100%; object-fit: cover; opacity: 0.8; }
+ .ascii-scene { isolation: isolate; --bg: #030408; --fg: #f4f4f5; --muted: #d4d4d8; --border: #45454c; --surface: #151720; --accent: #93c5fd; color-scheme: dark; }
+ .ascii-scene .diagram-view { border-radius: 0.75rem; background: #030408c9; }
+ .ascii-scene :global(.iso-plate-corner), .ascii-scene :global(.fe-keys), .ascii-scene :global(.rd-keys) { color: #d4d4d8; text-shadow: 0 1px 3px #030408; }
+ .ascii-scene .text { border-radius: 0.75rem; padding: 1rem; background: #030408e8; }
  .diagram-view { min-width: 0; width: 100%; max-width: calc((94dvh - 10rem) * 4 / 3); margin-inline: auto; }
  .diagram-view small { color: var(--muted); }
  .stack-dialog { position: fixed; inset: 0; margin: auto; width: min(1600px, 96vw); height: min(950px, 94dvh); max-width: 96vw; max-height: 94dvh; overscroll-behavior: contain; overflow: auto; padding: clamp(1rem, 2vw, 2rem); border: 1px solid var(--border); border-radius: 1rem; background: var(--bg); color: var(--fg); }

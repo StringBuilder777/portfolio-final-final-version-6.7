@@ -41,3 +41,7 @@ Contrato para que el portafolio siga ligero:
 - **Verifica con la primera figura** que el CSS de `iso.css` aparece en `dist/` (componentes cargados vía `import.meta.glob`).
 - **Licencia**: el kit copiado en `src/lib/iso/` es MIT (ver `src/lib/iso/LICENSE`). Cuando se envíe código del kit al navegador (p. ej. `gl.mjs`), publica el aviso en `public/licenses/anatomy.txt` y enlázalo desde el footer.
 - Si actualizas el submódulo, vuelve a copiar `iso-kit.ts`, `iso.css`, `gl.mjs` y `gl-shared.mjs`, y regenera los tokens de `theme.css`.
+
+## Continuidad del proyecto
+
+Antes de actualizar el portafolio, consulta `docs/estado-y-pendientes.md` para conocer las decisiones del usuario, el estado verificado y los módulos pendientes. Verifica el checkout actual antes de reutilizar ese estado.

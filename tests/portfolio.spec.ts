@@ -108,13 +108,19 @@ test('stack opens a diagram, exposes technologies and restores focus', async ({ 
  const dialog = page.locator('#dialog-redes');
  await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('button', { name: 'Cisco IOS', exact: true })).toBeVisible();
+ const stage = dialog.locator('.rd-stage');
+ const bounds = await stage.boundingBox();
  await dialog.getByRole('button', { name: 'Cisco IOS', exact: true }).click();
- await expect(page.locator('.rd-detail')).toBeVisible();
+ await expect(dialog.locator('[data-figure="redes"]')).toHaveAttribute('data-detail', 'open');
+ await expect(stage).toBeVisible();
+ expect(await stage.boundingBox()).toEqual(bounds);
  await expect(page.locator('dialog:modal')).toHaveCount(1);
- await dialog.getByRole('button', { name: 'Volver al rack', exact: true }).click();
- await expect(dialog.locator('.rd-stage')).toBeVisible();
+ await dialog.getByRole('button', { name: 'Cisco IOS', exact: true }).click();
+ await expect(dialog.locator('[data-figure="redes"]')).not.toHaveAttribute('data-detail', 'open');
  await dialog.getByRole('button', { name: 'Packet Tracer', exact: true }).click();
- await expect(dialog.locator('#rd-detail-title')).toHaveText('Packet Tracer');
+ await expect(dialog.locator('[data-figure="redes"]')).toHaveAttribute('data-detail', 'open');
+ await expect(dialog.getByRole('heading', { name: 'Redes', exact: true })).toBeVisible();
+ expect(await stage.boundingBox()).toEqual(bounds);
  await expect(page.locator('dialog:modal')).toHaveCount(1);
  await page.screenshot({ path: '/private/tmp/portfolio-packet-inline.png' });
  await page.keyboard.press('Escape');
@@ -165,4 +171,18 @@ test('enlarged dialogs stay inside the viewport after scrolling to Redes', async
   expect(await dialog.evaluate(element => element.scrollTop)).toBe(0);
   await page.keyboard.press('Escape');
  }
+});
+
+test('Redes loads edge-orbit only on open and preserves packet interaction', async ({ page }) => {
+ await page.goto('/');
+ const background = page.locator('#dialog-redes [data-ascii-background]');
+ await expect(background.locator('canvas')).toHaveCount(0);
+ await page.getByRole('button', { name: 'Explorar Redes', exact: true }).click();
+ await expect(background).toHaveAttribute('data-piece', 'edge-orbit');
+ await expect(background.locator('canvas')).toBeVisible();
+ await page.getByRole('button', { name: 'Packet Tracer', exact: true }).click();
+ await expect(page.locator('#dialog-redes [data-figure="redes"]')).toHaveAttribute('data-detail', 'open');
+ await page.screenshot({ path: '/private/tmp/portfolio-edge-orbit.png' });
+ await page.keyboard.press('Escape');
+ await expect(background.locator('canvas')).toHaveCount(0);
 });
