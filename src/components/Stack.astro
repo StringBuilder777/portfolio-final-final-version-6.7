@@ -11,6 +11,15 @@ import rust, { meta as rustMeta } from 'ascii.rest/pieces/rust';
 import lua, { meta as luaMeta } from 'ascii.rest/pieces/lua';
 import c, { meta as cMeta } from 'ascii.rest/pieces/c';
 import python, { meta as pythonMeta } from 'ascii.rest/pieces/python';
+import cisco, { meta as ciscoMeta } from '@/lib/ascii/logos/cisco';
+import fortinet, { meta as fortinetMeta } from '@/lib/ascii/logos/fortinet';
+import paloAlto, { meta as paloAltoMeta } from '@/lib/ascii/logos/palo-alto';
+import snort, { meta as snortMeta } from '@/lib/ascii/logos/snort';
+import debian, { meta as debianMeta } from 'ascii.rest/pieces/debian';
+import fedora, { meta as fedoraMeta } from 'ascii.rest/pieces/fedora';
+import kaliLinux, { meta as kaliLinuxMeta } from 'ascii.rest/pieces/kali-linux';
+import redHat, { meta as redHatMeta } from 'ascii.rest/pieces/red-hat';
+import tux, { meta as tuxMeta } from 'ascii.rest/pieces/tux';
 
 const frontendLogos = [
  { name: 'typescript', frame: typescript, meta: typescriptMeta },
@@ -25,6 +34,19 @@ const backendLogos = [
  { name: 'lua', frame: lua, meta: luaMeta },
  { name: 'c', frame: c, meta: cMeta },
  { name: 'python', frame: python, meta: pythonMeta },
+];
+const networkLogos = [
+ { name: 'cisco', frame: cisco, meta: ciscoMeta },
+ { name: 'fortinet', frame: fortinet, meta: fortinetMeta },
+ { name: 'palo-alto', frame: paloAlto, meta: paloAltoMeta },
+ { name: 'snort', frame: snort, meta: snortMeta },
+];
+const systemsLogos = [
+ { name: 'debian', frame: debian, meta: debianMeta },
+ { name: 'fedora', frame: fedora, meta: fedoraMeta },
+ { name: 'kali-linux', frame: kaliLinux, meta: kaliLinuxMeta },
+ { name: 'red-hat', frame: redHat, meta: redHatMeta },
+ { name: 'tux', frame: tux, meta: tuxMeta },
 ];
 
 // Cada figura vive en src/components/figures/<id>/Figure.astro y se detecta sola.
@@ -48,11 +70,11 @@ for (const id of Object.keys(figures)) {
  <ol class="areas">
   {site.stack.map((area) => {
    const Figure = figures[area.id];
-   const logos = area.id === 'frontend' ? frontendLogos : area.id === 'backend' ? backendLogos : [];
-   const asciiPiece = area.id === 'frontend' ? 'earthrise' : area.id === 'redes' ? 'edge-orbit' : area.id === 'backend' ? 'green-storm' : null;
+   const logos = area.id === 'frontend' ? frontendLogos : area.id === 'backend' ? backendLogos : area.id === 'redes' ? networkLogos : area.id === 'sistemas' ? systemsLogos : [];
+   const asciiPiece = area.id === 'frontend' ? 'earthrise' : area.id === 'redes' ? 'edge-orbit' : area.id === 'backend' ? 'green-storm' : area.id === 'sistemas' ? 'salt-flat' : null;
    return <li class="area" id={`stack-${area.id}`}>
     <div class="preview">
-     {logos.map(logo => <div class="preview-logo" data-preview-logo={logo.name} aria-hidden="true" style={`aspect-ratio:${logo.meta.cols}/${logo.meta.rows * 2};--logo-font:${100 / (logo.meta.cols * 0.6)}cqw`}><pre>{logo.frame({ shine: 5 })(0)}</pre></div>)}
+     {logos.map(logo => <div class="preview-logo" data-preview-logo={logo.name} aria-hidden="true" style={`aspect-ratio:${logo.meta.cols}/${logo.meta.rows * 2};--logo-font:${100 / (logo.meta.cols * 0.6)}cqw`}><pre>{logo.frame()(0)}</pre></div>)}
      <div class="figure-slot" data-figure-home={area.id}>
       {Figure ? <Figure /> : <div class="placeholder">{area.title}<small>Diagrama próximamente</small></div>}
      </div>
@@ -90,6 +112,15 @@ for (const id of Object.keys(figures)) {
   lua: () => import('ascii.rest/pieces/lua'),
   c: () => import('ascii.rest/pieces/c'),
   python: () => import('ascii.rest/pieces/python'),
+  cisco: () => import('@/lib/ascii/logos/cisco'),
+  fortinet: () => import('@/lib/ascii/logos/fortinet'),
+  'palo-alto': () => import('@/lib/ascii/logos/palo-alto'),
+  snort: () => import('@/lib/ascii/logos/snort'),
+  debian: () => import('ascii.rest/pieces/debian'),
+  fedora: () => import('ascii.rest/pieces/fedora'),
+  'kali-linux': () => import('ascii.rest/pieces/kali-linux'),
+  'red-hat': () => import('ascii.rest/pieces/red-hat'),
+  tux: () => import('ascii.rest/pieces/tux'),
  };
  for (const logo of document.querySelectorAll<HTMLElement>('[data-preview-logo]')) {
   const name = logo.dataset.previewLogo;
@@ -102,7 +133,7 @@ for (const id of Object.keys(figures)) {
     const [{ mount }, piece] = await Promise.all([import('ascii.rest'), load()]);
     const canvas = document.createElement('canvas');
     logo.replaceChildren(canvas);
-    mount(canvas, piece, { shine: 5, fps: 15 });
+    mount(canvas, piece, { ...piece.meta.options, fps: 15 });
    } catch { /* Conservar el primer fotograma si no se puede cargar la animación. */ }
   });
   observer.observe(logo);
@@ -129,7 +160,7 @@ for (const id of Object.keys(figures)) {
    if (background) {
     try {
      const [{ mount }, piece] = await Promise.all([import('ascii.rest'),
-      id === 'redes' ? import('@/lib/ascii/edge-orbit') : id === 'backend' ? import('@/lib/ascii/green-storm') : import('ascii.rest/pieces/earthrise')]);
+      id === 'redes' ? import('@/lib/ascii/edge-orbit') : id === 'backend' ? import('@/lib/ascii/green-storm') : id === 'sistemas' ? import('@/lib/ascii/salt-flat') : import('ascii.rest/pieces/earthrise')]);
      if (!dialog.open || request !== generation) return;
      const canvas = document.createElement('canvas');
      background.replaceChildren(canvas);
@@ -165,8 +196,17 @@ for (const id of Object.keys(figures)) {
  .preview-logo[data-preview-logo='lua'] { bottom: 9%; left: 0; width: 24%; transform: rotate(-12deg); color: #7777df; }
  .preview-logo[data-preview-logo='c'] { bottom: 0; right: 12%; width: 24%; transform: rotate(8deg); color: #659ad3; }
  .preview-logo[data-preview-logo='python'] { bottom: 1%; left: 30%; width: 23%; transform: rotate(-6deg); color: #417fb0; }
+ .preview-logo[data-preview-logo='cisco'] { top: 9%; left: 0; width: 29%; transform: rotate(-9deg); color: #176984; }
+ .preview-logo[data-preview-logo='palo-alto'] { top: 8%; right: 0; width: 25%; transform: rotate(10deg); color: #ff5529; }
+ .preview-logo[data-preview-logo='snort'] { bottom: 15%; left: 0; width: 25%; transform: rotate(-10deg); color: #f9a9ae; }
+ .preview-logo[data-preview-logo='fortinet'] { bottom: 1%; left: 24%; width: 56%; transform: rotate(4deg); color: #d33626; }
+ .preview-logo[data-preview-logo='debian'] { top: 10%; left: 1%; width: 21%; transform: rotate(-9deg); color: #c20037; }
+ .preview-logo[data-preview-logo='fedora'] { bottom: 0; left: 37%; width: 23%; transform: rotate(9deg); color: #3b5da3; }
+ .preview-logo[data-preview-logo='kali-linux'] { top: 8%; right: 1%; width: 37%; transform: rotate(-5deg); color: #287aff; }
+ .preview-logo[data-preview-logo='red-hat'] { bottom: 6%; right: 2%; width: 23%; transform: rotate(8deg); color: #e93442; }
+ .preview-logo[data-preview-logo='tux'] { bottom: 2%; left: 4%; width: 20%; transform: rotate(-8deg); color: #fdcc1b; }
  .preview-logo pre { margin: 0; font: var(--logo-font)/1.2 monospace; white-space: pre; }
- .preview-logo :global(canvas) { display: block; width: 100%; height: auto; }
+ .preview-logo :global(canvas) { display: block; width: 100%; height: auto; color: var(--fg); }
  .preview :global(.iso-plate-corners), .preview :global(figcaption) { display: none; }
  .preview :global(.fe-plate), .preview :global(.rd-plate) { padding: 0; }
  .open-area { position: absolute; inset: 0; width: 100%; border: 0; border-radius: 0.75rem; background: transparent; color: var(--fg); cursor: pointer; font: inherit; }
@@ -178,7 +218,7 @@ for (const id of Object.keys(figures)) {
  .ascii-background :global(canvas) { display: block; width: 100%; height: auto; min-height: 100%; object-fit: cover; opacity: 0.8; }
  .ascii-scene { isolation: isolate; --bg: #030408; --fg: #f4f4f5; --muted: #d4d4d8; --border: #45454c; --surface: #151720; --accent: #93c5fd; color-scheme: dark; }
  .ascii-scene .diagram-view { border-radius: 0; background: transparent; }
- .ascii-scene :global(.iso-plate-corner), .ascii-scene :global(.fe-keys), .ascii-scene :global(.rd-keys), .ascii-scene :global(.be-caption), .ascii-scene :global(.be-keys) { color: #d4d4d8; text-shadow: 0 1px 3px #030408; }
+ .ascii-scene :global(.iso-plate-corner), .ascii-scene :global(.fe-keys), .ascii-scene :global(.rd-keys), .ascii-scene :global(.be-caption), .ascii-scene :global(.be-keys), .ascii-scene :global(.sy-caption) { color: #d4d4d8; text-shadow: 0 1px 3px #030408; }
  .ascii-scene .text { border-radius: 0.75rem; padding: 1rem; background: #030408e8; }
  .diagram-view { min-width: 0; width: 100%; max-width: calc((94dvh - 10rem) * 4 / 3); margin-inline: auto; }
  .diagram-view small { color: var(--muted); }

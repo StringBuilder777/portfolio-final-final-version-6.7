@@ -1,0 +1,84 @@
+---
+import '@/lib/iso/iso.css';
+import '@/lib/iso/theme.css';
+import { figureSvg } from '@/lib/iso/iso-kit';
+import { build, W, H } from './geometry';
+
+const { body, data, readout } = build();
+const svg = figureSvg({ width: W, height: H, label: 'Fábrica isométrica de peluches. Entran piezas por la tolva superior, bajan a una cámara de calor con fuego, pasan por una prensa de confección y salen a la banda transportadora: primero el pingüino Tux de Linux, después la manzana de macOS y luego únicamente Linux.', body });
+---
+
+<figure class="sy-fig iso" data-figure="sistemas" data-systems={JSON.stringify(data)} data-delivered="0">
+ <div class="sy-plate">
+  <div class="sy-stage" style={`--ar:${W / H}`}>
+   <Fragment set:html={svg} />
+   <button class="sy-hit" type="button" aria-label="Pausar fábrica de peluches" aria-pressed="false"></button>
+  </div>
+ </div>
+ <figcaption class="sy-caption">
+  <div class="sy-status"><span data-sy-hint>Clic: pausar / continuar</span><output data-sy-readout>{readout}</output></div>
+  <div class="sy-footer"><span>Linux → macOS → Linux, Linux…</span><button class="sy-reset" type="button">Reiniciar secuencia</button></div>
+ </figcaption>
+</figure>
+
+<script>
+ for (const root of document.querySelectorAll<HTMLElement>('[data-figure="sistemas"]')) {
+  const observer = new IntersectionObserver(entries => {
+   if (!entries.some(entry => entry.isIntersecting)) return;
+   observer.disconnect();
+   import('./live').then(({ mount }) => mount(root)).catch(error => console.error('[figura sistemas]', error));
+  });
+  observer.observe(root);
+ }
+</script>
+
+<style is:global>
+ .sy-fig { display: flex; flex-direction: column; gap: 0.5rem; height: 100%; margin: 0; --sy-accent: #7dbdb0; --sy-glass: #77c8cb; --sy-rubber: #161b20; --sy-screen: #111c20; }
+ :root[data-theme='light'] .sy-fig { --sy-accent: #367d70; --sy-glass: #40888e; --sy-rubber: #424d55; --sy-screen: #e0eeea; }
+ @media(prefers-color-scheme: light) { :root:not([data-theme]) .sy-fig { --sy-accent: #367d70; --sy-glass: #40888e; --sy-rubber: #424d55; --sy-screen: #e0eeea; } }
+ .sy-plate { flex: 1; min-height: 0; container-type: size; }
+ .sy-stage { position: relative; width: min(100cqw, 100cqh * var(--ar)); aspect-ratio: var(--ar); margin: auto; }
+ .sy-stage > .iso-svg { display: block; width: 100%; height: 100%; }
+ .sy-hit { position: absolute; inset: 0; padding: 0; background: transparent; border: 0; cursor: pointer; }
+ .sy-hit:focus-visible { outline: 2px solid var(--sy-accent); outline-offset: 3px; border-radius: 0.5rem; }
+ .sy-accent .iso-fill { fill: color-mix(in srgb, var(--anatomy-paper), var(--sy-accent) 12%); }
+ .sy-accent .iso-top { fill: color-mix(in srgb, var(--anatomy-top), var(--sy-accent) 18%); }
+ .sy-accent .iso-shade[data-shade='2'] { fill: color-mix(in srgb, var(--anatomy-shade-2), var(--sy-accent) 12%); }
+ .sy-inset, .sy-slot, .sy-marquee-screen { fill: var(--sy-screen); stroke: var(--anatomy-lo); stroke-width: 0.5; }
+ .sy-display-line { fill: none; stroke: var(--sy-accent); stroke-width: 0.65; }
+ .sy-status-led { fill: var(--sy-accent); }
+ .sy-marquee-text { font-family: var(--anatomy-mono); fill: var(--sy-accent); font-weight: 700; }
+ .sy-window-pane { fill: color-mix(in srgb, var(--sy-glass) 3%, transparent); stroke: var(--anatomy-lo); stroke-width: 0.4; }
+ .sy-window-shine { fill: var(--sy-glass); opacity: 0.09; }
+ .sy-press-rod { fill: none; stroke: var(--anatomy-hi); stroke-width: 2.4; }
+ .sy-hot-window { fill: color-mix(in srgb, #92bed2 3%, transparent); stroke: var(--anatomy-lo); stroke-width: 0.4; }
+ .sy-heat-pool { fill: #ffb64a; opacity: 0.15; filter: url(#sy-heat-glow); }
+ .sy-flame { fill: url(#sy-flame); opacity: 0.9; }
+ .sy-flame-glow { fill: #fca83d; opacity: 0.3; filter: url(#sy-heat-glow); }
+ .sy-flame-core { fill: #fff5bc; opacity: 0.85; }
+ .sy-steam { fill: none; stroke: var(--anatomy-hi); stroke-width: 1.1; stroke-linecap: round; opacity: 0.4; }
+ [data-part='material.felt'] .iso-fill, [data-part='material.felt'] .iso-top { fill: #272c34; }
+ [data-part='material.filling'] .iso-fill, [data-part='material.filling'] .iso-top { fill: #fffef8; }
+ [data-part='material.yellow'] .iso-fill, [data-part='material.yellow'] .iso-top { fill: #ffd02b; }
+ .sy-roller-fill, .sy-roller-cap { fill: var(--sy-rubber); stroke: var(--anatomy-mid); stroke-width: 0.6; }
+ .sy-motor-rim { fill: none; stroke: var(--anatomy-mid); stroke-width: 0.6; }
+ .sy-plush-back { fill: #131820; }
+ .sy-plush-side { fill: #242c36; stroke: none; }
+ .sy-plush-side[data-kind='macos'], .sy-plush-back[data-kind='macos'] { fill: #9ba8b8; }
+ .sy-plush-face { fill: url(#sy-tux); stroke: #17212b; stroke-width: 0.45; }
+ .sy-plush-face[data-kind='macos'] { fill: url(#sy-apple); stroke: #8493a5; }
+ .sy-belly { fill: #fffef8; }
+ .sy-face-white { fill: #fffdf4; }
+ .sy-eye { fill: #10151b; }
+ .sy-eye-glint { fill: white; }
+ .sy-orange { fill: #ffd02b; stroke: #d49908; stroke-width: 0.35; }
+ .sy-smile { fill: none; stroke: #ad710d; stroke-width: 0.45; stroke-linecap: round; }
+ .sy-toy-shine { fill: white; opacity: 0.16; }
+ .sy-stitch { fill: none; stroke: #8b9195; stroke-width: 0.35; stroke-dasharray: 0.8 1.4; opacity: 0.6; }
+ .sy-apple-shine { fill: white; opacity: 0.55; }
+ .sy-apple-leaf { fill: #e4ebee; stroke: #9ca9b2; stroke-width: 0.3; }
+ .sy-caption { display: grid; gap: 0.65rem; color: var(--anatomy-text); font: 10.5px/1.4 var(--anatomy-mono); }
+ .sy-status, .sy-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+ .sy-reset { padding: 0.25rem 0.5rem; font: inherit; color: inherit; background: transparent; border: 1px solid var(--anatomy-lo); border-radius: 0.3rem; cursor: pointer; }
+ .sy-reset:focus-visible { outline: 2px solid var(--sy-accent); outline-offset: 2px; }
+</style>

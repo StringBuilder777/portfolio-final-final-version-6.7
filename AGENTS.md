@@ -27,7 +27,7 @@ La skill está en `.claude/skills/anatomy` (submódulo git; tras clonar: `git su
 
 Contrato para que el portafolio siga ligero:
 
-- **Ubicación**: `src/components/figures/<id>/Figure.astro`, con `<id>` ∈ `frontend | backend | redes | ciberseguridad | cloud`. `Stack.astro` la detecta sola con `import.meta.glob` y sustituye el placeholder.
+- **Ubicación**: `src/components/figures/<id>/Figure.astro`, con `<id>` ∈ `frontend | backend | redes | sistemas | cloud`. `Stack.astro` la detecta sola con `import.meta.glob` y sustituye el placeholder.
 - **Ruta framework-free, no la de React.** Las islas de Astro solo aceptan props serializables, así que el patrón de Anatomy de pasar arte JSX del servidor a un componente `"use client"` no aplica, y además cargaría ~65 KB de runtime de React. En su lugar:
   - Geometría en `.ts` dentro de la carpeta de la figura, usando `@/lib/iso/iso-kit` (copia de `kit/iso-kit.ts`). Se ejecuta **en build**, en el frontmatter de `Figure.astro`, y el SVG se inserta con `set:html`.
   - Movimiento en un `<script>` de Astro (TS nativo, lo empaqueta y difiere Astro). Arranca solo con `IntersectionObserver` y se detiene fuera de pantalla. Respeta `prefers-reduced-motion`. Mira `examples/dial-indicator/build.mjs` de la skill.
