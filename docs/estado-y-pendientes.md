@@ -14,7 +14,7 @@ Leer este archivo, `AGENTS.md` y `docs/certificaciones-y-deploy.md`. Revisar `gi
 - Al pulsar Cisco IOS o Packet Tracer, los equipos se extraen y regresan suavemente dentro del mismo diagrama. No abrir otra ventana, cambiar títulos, sustituir la vista ni mover su distribución. Pulsar de nuevo revierte la animación.
 - Fondos: Frontend `earthrise`, Redes `edge-orbit` y Backend `green-storm`. Se cargan solo al abrir la ventana, se destruyen al cerrar y respetan movimiento reducido.
 - Stack en escritorio: tres tarjetas arriba y dos centradas abajo; títulos arriba y centrados. Las miniaturas muestran solo el diagrama, conservando las leyendas en la ventana ampliada. No tomar capturas salvo nueva indicación del usuario.
-- Logos ASCII animados alrededor de Frontend (TypeScript, JavaScript, HTML, CSS, PHP) y Backend (Java, Rust, Lua, C). Se cargan al entrar en pantalla.
+- Logos ASCII animados alrededor de Frontend (TypeScript, JavaScript, HTML, CSS, PHP) y Backend (Java, Rust, Lua, C, Python). Se cargan al entrar en pantalla.
 - Publicar en **Vercel**, no Cloudflare. Supabase gestiona acceso, datos y archivos de certificaciones. Prioridad: planes gratuitos y revisar sus límites al configurar.
 - Usar la identidad de Git ya configurada. Solo hacer commit o push si se solicita; no se ha pedido push en esta entrega.
 

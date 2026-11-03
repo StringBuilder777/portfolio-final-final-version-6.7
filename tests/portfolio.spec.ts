@@ -193,7 +193,7 @@ test('Backend shows its servers and databases, switches operations and respects 
  await page.goto('/stack/');
  const preview = page.locator('[data-figure-home="backend"]');
  const background = page.locator('#dialog-backend [data-ascii-background]');
- await expect(page.locator('#stack-backend [data-preview-logo]')).toHaveCount(4);
+ await expect(page.locator('#stack-backend [data-preview-logo]')).toHaveCount(5);
  await expect(background.locator('canvas')).toHaveCount(0);
  await expect(preview.locator('[data-figure="backend"]')).toBeVisible();
  await expect(preview.locator('figcaption')).toBeHidden();

@@ -10,6 +10,7 @@ import java, { meta as javaMeta } from 'ascii.rest/pieces/java';
 import rust, { meta as rustMeta } from 'ascii.rest/pieces/rust';
 import lua, { meta as luaMeta } from 'ascii.rest/pieces/lua';
 import c, { meta as cMeta } from 'ascii.rest/pieces/c';
+import python, { meta as pythonMeta } from 'ascii.rest/pieces/python';
 
 const frontendLogos = [
  { name: 'typescript', frame: typescript, meta: typescriptMeta },
@@ -23,6 +24,7 @@ const backendLogos = [
  { name: 'rust', frame: rust, meta: rustMeta },
  { name: 'lua', frame: lua, meta: luaMeta },
  { name: 'c', frame: c, meta: cMeta },
+ { name: 'python', frame: python, meta: pythonMeta },
 ];
 
 // Cada figura vive en src/components/figures/<id>/Figure.astro y se detecta sola.
@@ -87,6 +89,7 @@ for (const id of Object.keys(figures)) {
   rust: () => import('ascii.rest/pieces/rust'),
   lua: () => import('ascii.rest/pieces/lua'),
   c: () => import('ascii.rest/pieces/c'),
+  python: () => import('ascii.rest/pieces/python'),
  };
  for (const logo of document.querySelectorAll<HTMLElement>('[data-preview-logo]')) {
   const name = logo.dataset.previewLogo;
@@ -161,6 +164,7 @@ for (const id of Object.keys(figures)) {
  .preview-logo[data-preview-logo='rust'] { top: 6%; right: 0; width: 29%; transform: rotate(10deg); color: #f74c00; }
  .preview-logo[data-preview-logo='lua'] { bottom: 9%; left: 0; width: 24%; transform: rotate(-12deg); color: #7777df; }
  .preview-logo[data-preview-logo='c'] { bottom: 0; right: 12%; width: 24%; transform: rotate(8deg); color: #659ad3; }
+ .preview-logo[data-preview-logo='python'] { bottom: 1%; left: 30%; width: 23%; transform: rotate(-6deg); color: #417fb0; }
  .preview-logo pre { margin: 0; font: var(--logo-font)/1.2 monospace; white-space: pre; }
  .preview-logo :global(canvas) { display: block; width: 100%; height: auto; }
  .preview :global(.iso-plate-corners), .preview :global(figcaption) { display: none; }
