@@ -314,7 +314,7 @@ test('Systems factory produces Linux, macOS and then only Linux, with pause and 
 
 test('home presents the name over wired intelligence on desktop, mobile and without JavaScript', async ({ page, browser }) => {
  await page.emulateMedia({ reducedMotion: 'reduce' });
- for (const width of [1280, 390]) {
+ for (const width of [1920, 1280, 390]) {
   await page.setViewportSize({ width, height: 900 });
   await page.goto('/');
   const hero = page.getByRole('region', { name: 'Luis Emilaino Garcia Sifuentes', exact: true });
@@ -322,6 +322,13 @@ test('home presents the name over wired intelligence on desktop, mobile and with
   await expect(hero.locator('canvas')).toBeVisible();
   await expect(hero.getByRole('heading', { level: 1 })).toHaveText('Luis Emilaino Garcia Sifuentes');
   await expect(hero.getByRole('link', { name: 'Ver proyectos', exact: true })).toBeVisible();
+  const bounds = await hero.evaluate(element => {
+   const section = element.getBoundingClientRect();
+   const art = element.querySelector('canvas')!.getBoundingClientRect();
+   return { bottom: section.bottom, viewport: innerHeight, contained: art.left >= section.left - 1 && art.right <= section.right + 1 && art.top >= section.top - 1 && art.bottom <= section.bottom + 1 };
+  });
+  expect(Math.abs(bounds.bottom - bounds.viewport)).toBeLessThanOrEqual(1);
+  expect(bounds.contained).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
  }
  const context = await browser.newContext({ javaScriptEnabled: false });

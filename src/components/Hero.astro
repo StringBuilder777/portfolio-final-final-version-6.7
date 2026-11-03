@@ -20,6 +20,13 @@ const still = wiredIntelligence({ speed: 0 })(0);
 </section>
 
 <script>
+	const hero = document.querySelector<HTMLElement>('.hero');
+	const header = document.querySelector<HTMLElement>('header');
+	if (hero && header) {
+		const syncHeight = () => hero.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
+		syncHeight();
+		new ResizeObserver(syncHeight).observe(header);
+	}
 	for (const root of document.querySelectorAll<HTMLElement>('[data-hero-ascii]')) {
 		const observer = new IntersectionObserver(async (entries) => {
 			if (!entries.some(entry => entry.isIntersecting)) return;
@@ -47,7 +54,8 @@ const still = wiredIntelligence({ speed: 0 })(0);
 		isolation: isolate;
 		display: grid;
 		align-items: center;
-		min-height: clamp(32rem, 78svh, 46rem);
+		--header-height: 4rem;
+		min-height: calc(100svh - var(--header-height));
 		padding-block: clamp(3rem, 8vw, 7rem);
 		overflow: hidden;
 		background: var(--bg);
@@ -55,8 +63,8 @@ const still = wiredIntelligence({ speed: 0 })(0);
 	}
 	.hero::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, #080706f0 0%, #080706ca 38%, #08070665 68%, #08070630 100%); }
 	.hero-art { position: absolute; inset: 0; z-index: -2; container-type: size; overflow: hidden; pointer-events: none; color: #b2b0ab; }
-	.hero-art pre { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; width: max-content; font: max(calc(100cqw / 192), calc(100cqh / 108))/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; opacity: 0.85; }
-	.hero-art :global(canvas) { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: max(100cqw, calc(100cqh * 16 / 9)) !important; height: auto; max-width: none; opacity: 0.9; }
+	.hero-art pre { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; width: max-content; font: min(calc(100cqw / 192), calc(100cqh / 108))/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; opacity: 0.85; }
+	.hero-art :global(canvas) { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(100cqw, calc(100cqh * 16 / 9)) !important; height: auto; max-width: none; opacity: 0.9; }
 	.hero-content { position: relative; }
 	.eyebrow {
 		font-family: var(--font-mono);
@@ -95,8 +103,10 @@ const still = wiredIntelligence({ speed: 0 })(0);
 		color: var(--bg);
 		border-color: var(--fg);
 	}
+	@media(max-width: 1000px) {
+		.hero { --header-height: 7rem; }
+	}
 	@media(max-width: 600px) {
-		.hero { min-height: 34rem; }
 		.hero::after { background: linear-gradient(90deg, #080706e8, #080706b0); }
 	}
 </style>
