@@ -1,0 +1,37 @@
+---
+import SectionLayout from '@/layouts/SectionLayout.astro';
+import '@/styles/certifications.css';
+---
+<SectionLayout title="Administración" noindex>
+ <section class="container section certificates">
+  <div class="cert-heading"><h1>Certificaciones</h1><button id="logout" hidden>Cerrar sesión</button></div>
+  <p class="intro">Administra tus certificaciones y documentos.</p>
+  <p id="admin-status" role="status" aria-live="polite">Comprobando acceso…</p>
+  <form id="login" class="cert-form" hidden>
+   <label>Correo electrónico<input name="email" type="email" autocomplete="username" required /></label>
+   <label>Contraseña<input name="password" type="password" autocomplete="current-password" required /></label>
+   <button type="submit" class="primary">Entrar</button>
+  </form>
+  <div id="workspace" class="cert-workspace" hidden>
+   <form id="editor" class="cert-form">
+    <h2 id="editor-title">Nueva certificación</h2>
+    <input name="id" type="hidden" />
+    <label>Nombre<input name="title" maxlength="160" required /></label>
+    <label>Emisor<input name="issuer" maxlength="160" required /></label>
+    <label>Fecha de emisión<input name="issued_on" type="date" /></label>
+    <label>Enlace de verificación<input name="verification_url" type="url" placeholder="https://" /></label>
+    <label>Documento (PDF o imagen)<input name="document" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" aria-describedby="file-help" /></label>
+    <small id="file-help">PDF, JPG, PNG o WebP. Máximo 5 MB. Al editar, conserva el archivo si no eliges otro.</small>
+    <p id="current-document"></p>
+    <label class="check"><input name="remove_document" type="checkbox" />Quitar documento actual</label>
+    <label class="check"><input name="published" type="checkbox" />Publicada</label>
+    <div class="cert-actions"><button type="submit" class="primary">Guardar certificación</button><button type="reset">Limpiar</button></div>
+   </form>
+   <section aria-labelledby="list-title"><h2 id="list-title">Tus certificaciones</h2><button id="refresh" type="button">Actualizar lista</button><div id="admin-list" class="cert-list"></div></section>
+  </div>
+  <noscript>Activa JavaScript para administrar las certificaciones.</noscript>
+ </section>
+</SectionLayout>
+<script>
+ import '@/scripts/certifications-admin';
+</script>

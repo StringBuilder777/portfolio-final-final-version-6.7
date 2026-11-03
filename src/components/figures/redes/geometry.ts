@@ -393,6 +393,13 @@ function isr(): Device {
 	return { u: 8, h: 1, depth: 92, color: 'cisco', face: out.join('') };
 }
 
+/** Las mismas piezas del rack, aisladas para la vista de detalle. */
+export function ciscoDevices(): string {
+	return [catalyst(), isr()].map((device, index) =>
+		`<g class="rd-detail-device rd-detail-device-${index}">${body(device)}${faceplate(device)}</g>`,
+	).join('');
+}
+
 function firewall(): Device {
 	const zb = uz(7);
 	const out: string[] = [logo(-86, zb + 13.4, 9, wall), ltext(-71.4, zb + 9.6, 3.4, 'ACL', 'start', 'mid'), ltext(-86, zb + 2.4, 2.2, 'OUTSIDE_IN', 'start', 'lo')];
@@ -719,12 +726,12 @@ export function build(): Built {
 		left.front,
 		post(-1, FRONT_POST, true),
 		box(-101, -89, REAR_POST.y1, FRONT_POST.y0, TOP, TOP + 6, { tone: 'mid' }, 0.3),
-		...devices.map(body),
+		...devices.map((device) => `<g${device.color === 'cisco' ? ' class="rd-rack-cisco"' : ''}>${body(device)}</g>`),
 		lacingBar(),
 		post(1, FRONT_POST, true),
 		box(89, 101, REAR_POST.y1, FRONT_POST.y0, TOP, TOP + 6, { tone: 'mid' }, 0.3),
 		box(-89, 89, -14, -8, TOP + 2, TOP + 6, { tone: 'mid' }, 0.3),
-		...devices.map(faceplate),
+		...devices.map((device) => `<g${device.color === 'cisco' ? ' class="rd-rack-cisco"' : ''}>${faceplate(device)}</g>`),
 		ring.back,
 		right.back,
 		tray(cordSvg(ISP_TRAY, 'isp', 2.6), cordSvg(ISP_DROP, 'isp', 2.6)),

@@ -5,7 +5,7 @@
 import '@/lib/iso/iso.css';
 import '@/lib/iso/theme.css';
 import { figureSvg } from '@/lib/iso/iso-kit';
-import { build, H, W } from './geometry';
+import { build, ciscoDevices, H, W } from './geometry';
 
 const { back, front, label, readout, data } = build();
 const backSvg = figureSvg({ width: W, height: H, label, body: back, className: 'rd-layer' });
@@ -31,6 +31,9 @@ const keys = [
 			<Fragment set:html={backSvg} />
 			<canvas class="rd-layer rd-gl" aria-hidden="true"></canvas>
 			<Fragment set:html={frontSvg} />
+			<svg class="iso-svg rd-layer rd-extraction" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+				<g set:html={ciscoDevices()} />
+			</svg>
 			<button
 				class="rd-layer rd-hit"
 				type="button"
@@ -43,11 +46,25 @@ const keys = [
 	<figcaption class="rd-keys">
 		{keys.map((key) => <span class="rd-key" data-brand={key.brand}>{key.name}<span class="rd-role"> · {key.role}</span></span>)}
 	</figcaption>
+
 </figure>
 
 <script>
 	// Arranque mínimo: el movimiento y WebGL se descargan solo cuando la figura se acerca a la pantalla.
 	for (const root of document.querySelectorAll<HTMLElement>('[data-figure="redes"]')) {
+		const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-network-detail]')];
+		const setDetail = (open: boolean) => {
+			if (open) root.dataset.detail = 'open';
+			else delete root.dataset.detail;
+			for (const button of buttons) button.setAttribute('aria-pressed', String(open));
+		};
+		for (const button of buttons) {
+			button.setAttribute('aria-pressed', 'false');
+			button.addEventListener('click', () => setDetail(root.dataset.detail !== 'open'));
+		}
+		document.addEventListener('close', (event) => {
+			if (event.target instanceof HTMLDialogElement && event.target.contains(root)) setDetail(false);
+		}, true);
 		const io = new IntersectionObserver(
 			(entries) => {
 				if (!entries.some((entry) => entry.isIntersecting)) return;
@@ -176,6 +193,19 @@ const keys = [
 		--anatomy-paper: var(--bg);
 		container-type: size;
 	}
+	.rd-extraction { pointer-events: none; opacity: 0; transition: opacity 160ms ease; }
+	.rd-detail-device { transform-box: fill-box; transform-origin: center; transition: transform 850ms cubic-bezier(.22, 1, .36, 1); }
+	.rd-stage > svg:not(.rd-extraction), .rd-gl { transition: opacity 600ms ease; }
+	.rd-stage .rd-rack-cisco { transition: opacity 160ms ease; }
+	.rd-fig[data-detail='open'] .rd-extraction { opacity: 1; }
+	.rd-fig[data-detail='open'] .rd-stage > svg:not(.rd-extraction), .rd-fig[data-detail='open'] .rd-gl { opacity: 0.35; }
+	.rd-fig[data-detail='open'] .rd-stage .rd-rack-cisco { opacity: 0; }
+	.rd-fig[data-detail='open'] .rd-detail-device-0 { transform: translate(75px, -35px) scale(1.15); }
+	.rd-fig[data-detail='open'] .rd-detail-device-1 { transform: translate(75px, 60px) scale(1.15); }
+	@media (prefers-reduced-motion: reduce) {
+		.rd-extraction, .rd-detail-device, .rd-stage > svg, .rd-gl, .rd-stage .rd-rack-cisco { transition: none; }
+	}
+
 	.rd-stage {
 		position: relative;
 		width: min(100cqw, 100cqh * var(--ar));

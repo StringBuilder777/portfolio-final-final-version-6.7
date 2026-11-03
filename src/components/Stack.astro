@@ -18,102 +18,108 @@ for (const id of Object.keys(figures)) {
 ---
 
 <section id="stack" class="container section">
-	<h2>Stack</h2>
-	<ol class="areas">
-		{site.stack.map((area) => {
-			const Figure = figures[area.id];
-			return (
-				<li class="area" id={`stack-${area.id}`}>
-					<div class="text">
-						<h3>{area.title}</h3>
-						<p>{area.summary}</p>
-						<ul class="techs">
-							{area.techs.map((tech) => <li>{tech}</li>)}
-						</ul>
-					</div>
-					<div class="figure-slot">
-						{Figure ? (
-							<Figure />
-						) : (
-							<div class="placeholder">
-								<p>{area.concept}</p>
-							</div>
-						)}
-					</div>
-				</li>
-			);
-		})}
-	</ol>
+ <h2>Stack</h2>
+ <p>Selecciona un diagrama para explorar sus tecnologías.</p>
+ <ol class="areas">
+  {site.stack.map((area) => {
+   const Figure = figures[area.id];
+   return <li class="area" id={`stack-${area.id}`}>
+    <div class="preview">
+     <div class="figure-slot" data-figure-home={area.id}>
+      {Figure ? <Figure /> : <div class="placeholder">{area.title}<small>Diagrama próximamente</small></div>}
+     </div>
+     <button type="button" class="open-area" data-open-area={area.id} aria-haspopup="dialog" aria-controls={`dialog-${area.id}`} aria-label={`Explorar ${area.title}`}><span>{area.title}</span></button>
+    </div>
+    <dialog id={`dialog-${area.id}`} class:list={["stack-dialog", { "ascii-scene": area.id === "frontend" || area.id === "redes" }]} aria-labelledby={`title-${area.id}`}>
+     {(area.id === 'frontend' || area.id === 'redes') && <div class="ascii-background" data-ascii-background data-piece={area.id === 'frontend' ? 'earthrise' : 'edge-orbit'} data-earthrise={area.id === 'frontend' ? '' : undefined} aria-hidden="true"></div>}
+     <form method="dialog"><button class="close-area" aria-label={`Cerrar ${area.title}`}>Cerrar</button></form>
+     <div class="detail-layout">
+      <div class="diagram-view">
+       <div class="figure-slot expanded-figure" data-figure-target={area.id}>
+        <div class="figure-original"></div>
+       </div>
+      </div>
+      <div class="text">
+       <h3 id={`title-${area.id}`}>{area.title}</h3>
+       <p>{area.summary}</p>
+       <ul class="techs">{area.techs.map((tech) => <li>{area.id === 'redes' && (tech === 'Cisco IOS' || tech === 'Packet Tracer') ? <button type="button" class="tech-button" data-network-detail={tech}>{tech}</button> : tech}</li>)}</ul>
+      </div>
+     </div>
+    </dialog>
+   </li>;
+  })}
+ </ol>
 </section>
-
+<script>
+ for (const button of document.querySelectorAll<HTMLButtonElement>('[data-open-area]')) {
+  const id = button.dataset.openArea!;
+  const dialog = document.getElementById(`dialog-${id}`) as HTMLDialogElement;
+  const home = document.querySelector<HTMLElement>(`[data-figure-home="${id}"]`)!;
+  const target = dialog.querySelector<HTMLElement>('[data-figure-target]')!;
+  const original = target.querySelector<HTMLElement>('.figure-original')!;
+  const background = dialog.querySelector<HTMLElement>('[data-ascii-background]');
+  let stopBackground: (() => void) | null = null;
+  let generation = 0;
+  button.addEventListener('click', async () => {
+   const request = ++generation;
+   const source = home.getBoundingClientRect();
+   original.append(...Array.from(home.childNodes));
+   dialog.showModal(); dialog.scrollTop = 0;
+   document.documentElement.style.overflow = 'hidden';
+   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const end = target.getBoundingClientRect();
+    target.animate([{ transformOrigin: '0 0', transform: `translate(${source.x-end.x}px, ${source.y-end.y}px) scale(${source.width/end.width})`, opacity: 0.5 }, { transformOrigin: '0 0', transform: 'none', opacity: 1 }], { duration: 450, easing: 'cubic-bezier(.2,.7,.2,1)' });
+   }
+   if (background) {
+    try {
+     const [{ mount }, piece] = await Promise.all([import('ascii.rest'),
+      id === 'redes' ? import('@/lib/ascii/edge-orbit') : import('ascii.rest/pieces/earthrise')]);
+     if (!dialog.open || request !== generation) return;
+     const canvas = document.createElement('canvas');
+     background.replaceChildren(canvas);
+     stopBackground = mount(canvas, piece, { fps: 15 });
+    } catch { /* El diagrama sigue disponible si no se puede cargar el fondo decorativo. */ }
+   }
+  });
+  dialog.addEventListener('close', () => {
+   generation++; stopBackground?.(); stopBackground = null;
+   background?.replaceChildren();
+   home.append(...Array.from(original.childNodes));
+   document.documentElement.style.overflow = ''; button.focus({ preventScroll: true });
+  });
+ }
+</script>
 <style>
-	.areas {
-		display: grid;
-		gap: 4rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-	.area {
-		display: grid;
-		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-		gap: 2.5rem;
-		align-items: center;
-	}
-	.area:nth-child(even) .text {
-		order: 2;
-	}
-	h3 {
-		margin: 0 0 0.5rem;
-		font-size: 1.25rem;
-	}
-	p {
-		color: var(--muted);
-		margin: 0 0 1rem;
-	}
-	.techs {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		font-family: var(--font-mono);
-		font-size: 0.8rem;
-	}
-	.techs li {
-		padding: 0.15rem 0.5rem;
-		border: 1px solid var(--border);
-		border-radius: 999px;
-	}
-	.figure-slot {
-		min-width: 0;
-		aspect-ratio: 4 / 3;
-	}
-	.placeholder {
-		display: grid;
-		place-items: center;
-		height: 100%;
-		padding: 2rem;
-		border: 1px dashed var(--border);
-		border-radius: 0.75rem;
-		background: var(--surface);
-		color: var(--muted);
-		font-family: var(--font-mono);
-		font-size: 0.85rem;
-		text-align: center;
-	}
-	.placeholder p {
-		margin: 0;
-		color: inherit;
-	}
-	@media (max-width: 768px) {
-		.area {
-			grid-template-columns: 1fr;
-			gap: 1.5rem;
-		}
-		.area:nth-child(even) .text {
-			order: 0;
-		}
-	}
+ .areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; list-style: none; margin: 0; padding: 0; }
+ .area { min-width: 0; }
+ .preview { position: relative; padding-bottom: 2rem; }
+ .open-area { position: absolute; inset: 0; width: 100%; border: 0; border-radius: 0.75rem; background: transparent; color: var(--fg); cursor: pointer; font: inherit; }
+ .open-area span { position: absolute; bottom: 0; left: 0; font-weight: 600; }
+ .open-area:hover, .open-area:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+ .figure-slot { min-width: 0; aspect-ratio: 4 / 3; }
+ .figure-original { width: 100%; height: 100%; }
+ .ascii-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; display: grid; align-items: center; }
+ .ascii-background :global(canvas) { display: block; width: 100%; height: auto; min-height: 100%; object-fit: cover; opacity: 0.8; }
+ .ascii-scene { isolation: isolate; --bg: #030408; --fg: #f4f4f5; --muted: #d4d4d8; --border: #45454c; --surface: #151720; --accent: #93c5fd; color-scheme: dark; }
+ .ascii-scene .diagram-view { border-radius: 0.75rem; background: #030408c9; }
+ .ascii-scene :global(.iso-plate-corner), .ascii-scene :global(.fe-keys), .ascii-scene :global(.rd-keys) { color: #d4d4d8; text-shadow: 0 1px 3px #030408; }
+ .ascii-scene .text { border-radius: 0.75rem; padding: 1rem; background: #030408e8; }
+ .diagram-view { min-width: 0; width: 100%; max-width: calc((94dvh - 10rem) * 4 / 3); margin-inline: auto; }
+ .diagram-view small { color: var(--muted); }
+ .stack-dialog { position: fixed; inset: 0; margin: auto; width: min(1600px, 96vw); height: min(950px, 94dvh); max-width: 96vw; max-height: 94dvh; overscroll-behavior: contain; overflow: auto; padding: clamp(1rem, 2vw, 2rem); border: 1px solid var(--border); border-radius: 1rem; background: var(--bg); color: var(--fg); }
+ .stack-dialog::backdrop { background: #0009; backdrop-filter: blur(6px); }
+ .stack-dialog > form { position: sticky; top: 0; z-index: 2; display: flex; justify-content: end; pointer-events: none; }
+ .stack-dialog > form button { pointer-events: auto; }
+ .close-area { font: inherit; padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border); color: var(--fg); border-radius: 0.5rem; cursor: pointer; }
+ .detail-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 1.4fr); gap: 2rem; align-items: center; min-height: calc(100% - 3rem); }
+ h3 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+ p { color: var(--muted); }
+ .techs { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; margin: 0; padding: 0; font: 0.8rem var(--font-mono); }
+ .techs li { padding: 0.2rem 0.5rem; border: 1px solid var(--border); border-radius: 999px; }
+ .techs li:has(.tech-button) { padding: 0; }
+ .tech-button { padding: 0.2rem 0.5rem; border: 0; border-radius: inherit; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+ .tech-button:hover, .tech-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+ .placeholder { display: grid; align-content: center; justify-items: center; height: 100%; background: var(--surface); color: var(--muted); border-radius: 0.75rem; }
+ .placeholder small { display: block; }
+ @media(max-width: 700px) { .areas, .detail-layout { grid-template-columns: 1fr; } .detail-layout { gap: 1.5rem; min-height: 0; padding-top: 1rem; } .diagram-view { max-width: none; } }
 </style>

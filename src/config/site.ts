@@ -48,10 +48,12 @@ export const site: Site = {
 		{ label: 'LinkedIn', href: 'https://www.linkedin.com/' },
 	],
 	nav: [
-		{ label: 'Stack', href: '#stack' },
-		{ label: 'Proyectos', href: '#proyectos' },
-		{ label: 'Sobre mí', href: '#sobre-mi' },
-		{ label: 'Contacto', href: '#contacto' },
+		{ label: 'Inicio', href: '/' },
+		{ label: 'Stack', href: '/stack/' },
+		{ label: 'Proyectos', href: '/proyectos/' },
+		{ label: 'Certificaciones', href: '/certificaciones/' },
+		{ label: 'Sobre mí', href: '/sobre-mi/' },
+		{ label: 'Contacto', href: '/contacto/' },
 	],
 	projects: [
 		{
